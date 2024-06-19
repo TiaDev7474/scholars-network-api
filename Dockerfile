@@ -21,8 +21,17 @@ COPY --chown=node:node . .
 
 # Set NODE_ENV environment variable
 ENV NODE_ENV development
+# Set the correct permissions
+RUN chown -R node:node /usr/src/app
 
+# Switch to the node user
 USER node
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose the port the app runs on
+EXPOSE 3000
 
 # Start the application in development mode
 CMD ["npm", "run", "start:dev"]
