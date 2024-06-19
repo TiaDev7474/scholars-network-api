@@ -31,7 +31,7 @@ export class UsersRepository {
     }
   }
   private async findUserByEmail(email: string) {
-    return this.prisma.user.findUnique({
+    return this.prisma.user.findFirst({
       where: {
         email,
       },
