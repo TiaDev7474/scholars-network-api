@@ -14,8 +14,6 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: >
-      sh -c "npm install && npx prisma generate && npm start"
     user: node
     depends_on:
        - postgres
