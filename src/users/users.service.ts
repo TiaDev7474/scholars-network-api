@@ -20,8 +20,11 @@ export class UsersService {
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
   }): Promise<User[]> {
+    //todo: return user profileId
     try {
-      return this.usersRepository.findAll(params);
+      return this.usersRepository.findAll({
+        ...params,
+      });
     } catch (e) {
       if (e instanceof DatabaseException) {
         throw new InternalServerErrorException('Internal server error');
