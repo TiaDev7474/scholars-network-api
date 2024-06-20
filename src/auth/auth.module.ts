@@ -6,6 +6,8 @@ import { UsersModule } from '../users/users.module';
 import { jwtConstants } from './constant';
 import { AuthGuard } from './guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { RedisRepository } from '../common/lib/redis/redis.repository';
+import { RedisFactoryProvider } from "../common/provider/redis.factory";
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    RedisRepository,
+    RedisFactoryProvider,
   ],
   controllers: [AuthController],
   exports: [AuthService],
