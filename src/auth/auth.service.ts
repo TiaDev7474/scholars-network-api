@@ -7,18 +7,22 @@ import {
 } from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import * as argon2 from 'argon2';
+import { v4 as uuidV4 } from 'uuid';
 import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import {
   EmailAlreadyInUseException,
   UserNotFoundException,
 } from '../common/exceptions/exception';
+import { RedisRepository } from '../common/lib/redis/redis.repository';
+import { RedisPrefixEnum } from '../common/lib/redis/enums/redis.prifix.enum';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
+    private redisRepository: RedisRepository,
   ) {}
 
   async signInWithPasswordAndEmail(params: {
@@ -68,6 +72,56 @@ export class AuthService {
         );
       }
       throw new InternalServerErrorException();
+    }
+  }
+  async requestPasswordRecovery(email: string) {
+    try {
+      const user = await this.usersRepository.findUserByEmail(email);
+      if (!user) {
+        throw new BadRequestException('Email not found');
+      }
+      const token = uuidV4();
+      await this.redisRepository.setWithExpiry(
+        RedisPrefixEnum.RESET_TOKEN,
+        token,
+        user.id,
+        60,
+      );
+    } catch (e) {
+      if (e instanceof UserNotFoundException) {
+        throw new NotFoundException(e.message);
+      }
+      throw e;
+    }
+  }
+  async validatePasswordRecoveryToken(token: string) {
+    const userId = await this.redisRepository.get(
+      RedisPrefixEnum.RESET_TOKEN,
+      token,
+    );
+    if (!userId) {
+      throw new BadRequestException('Invalid or expire token');
+    }
+    return userId;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const userId = await this.validatePasswordRecoveryToken(token);
+      const hashedPassword = await this.hashPassword(newPassword);
+      await this.usersRepository.updateOne({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: hashedPassword,
+        },
+      });
+    } catch (e) {
+      if (e instanceof UserNotFoundException) {
+        throw new NotFoundException(e.message);
+      }
+      throw e;
     }
   }
   async getAuthenticatedUser(id: string) {
