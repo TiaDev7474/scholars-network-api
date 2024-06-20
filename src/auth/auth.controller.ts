@@ -9,16 +9,17 @@ import { Public } from '../common/decorators/public.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     return this.authService.signupWithEmailAndPassword(createUserDto);
   }
 
+  @Public()
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.signInWithPasswordAndEmail(loginUserDto);
   }
-  @Public()
   @Get('me')
   async profile(@GetUser() user: any) {
     return this.authService.getAuthenticatedUser(user.id);
