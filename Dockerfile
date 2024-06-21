@@ -75,6 +75,7 @@ WORKDIR /usr/src/app
 # Copy the bundled code and node_modules from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+RUN npx prisma generate --schema=/usr/src/app/src/common/database/schema.prisma
 
 # Switch to the node user
 USER node
