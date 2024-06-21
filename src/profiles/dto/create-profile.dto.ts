@@ -1,12 +1,12 @@
 import {
-  ArrayNotEmpty,
-  IsArray,
-  IsDate,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+  ArrayNotEmpty ,
+  IsArray ,
+  IsDate ,
+  IsInt , IsNumberString ,
+  IsOptional ,
+  IsString ,
+  IsUrl
+} from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProfileDto {
@@ -17,7 +17,6 @@ export class CreateProfileDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsUrl()
   profilePicture?: string;
 
   @ApiProperty()
@@ -26,22 +25,20 @@ export class CreateProfileDto {
   dateOfBirth?: Date;
 
   @ApiProperty()
-  @IsInt()
+  @IsNumberString()
   countryId: number;
 
   @ApiProperty()
   @IsArray()
   @ArrayNotEmpty()
-  @IsInt({ each: true })
   desiredStudyCountryIds: number[];
 
   @ApiProperty()
   @IsArray()
   @ArrayNotEmpty()
-  @IsInt({ each: true })
   academicsInterestIds: number[];
 
   @ApiProperty()
-  @IsInt()
+  @IsNumberString()
   currentStudyLevelId: number;
 }

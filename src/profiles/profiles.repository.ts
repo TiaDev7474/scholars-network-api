@@ -14,7 +14,7 @@ import { DatabaseException } from '../common/exceptions/exception';
 @Injectable()
 export class ProfilesRepository {
   constructor(private readonly prisma: PrismaService) {}
-  create(data: Prisma.ProfileCreateInput, include: Prisma.ProfileInclude) {
+  async create(data: Prisma.ProfileCreateInput, include: Prisma.ProfileInclude) {
     try {
       return this.prisma.profile.create({
         data,
@@ -32,7 +32,7 @@ export class ProfilesRepository {
     }
   }
 
-  findAll(params: {
+ async findAll(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.ProfileWhereUniqueInput;
@@ -56,7 +56,7 @@ export class ProfilesRepository {
     }
   }
 
-  findOne(id: Prisma.ProfileWhereUniqueInput['id']) {
+  async findOne(id: Prisma.ProfileWhereUniqueInput['id']) {
     try {
       return this.prisma.profile.findUnique({
         where: {
@@ -87,7 +87,7 @@ export class ProfilesRepository {
     }
   }
 
-  update(params: {
+ async update(params: {
     where: Prisma.ProfileWhereUniqueInput;
     data: Prisma.ProfileUpdateInput;
     include: Prisma.ProfileInclude;
@@ -110,7 +110,7 @@ export class ProfilesRepository {
       throw new InternalServerErrorException();
     }
   }
-  remove(id: Prisma.ProfileWhereUniqueInput['id']) {
+  async remove(id: Prisma.ProfileWhereUniqueInput['id']) {
     try {
       return this.prisma.profile.delete({
         where: {
@@ -128,4 +128,15 @@ export class ProfilesRepository {
       throw new InternalServerErrorException();
     }
   }
+  async getAllCountry() {
+     return this.prisma.country.findMany()
+  }
+
+  async getAllAcademics(){
+     return this.prisma.academics.findMany()
+  }
+  async getAllStudyLevel() {
+    return this.prisma.studyLevel.findMany()
+  }
+
 }

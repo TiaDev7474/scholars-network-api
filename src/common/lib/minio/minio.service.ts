@@ -4,11 +4,13 @@ import { ConfigService } from '@nestjs/config';
 export class MinioService {
   private readonly bucketName: string;
   constructor(
-    @Inject('MINIO_CLIENT') private readonly minioClient: Minio.Client, private readonly configService: ConfigService
+    @Inject('MINIO_CLIENT') private readonly minioClient: Minio.Client,
+    private readonly configService: ConfigService,
   ) {
+    console.log(this.configService.get<string>('MINIO_BUCKET_NAME'));
     this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME');
   }
-  private async createBucketsIfNotExist() {
+  async createBucketsIfNotExist() {
     const bucketExists = await this.minioClient.bucketExists(this.bucketName);
     if (!bucketExists) {
       await this.minioClient.makeBucket(this.bucketName);
@@ -17,11 +19,15 @@ export class MinioService {
 
   async uploadFile(file: Express.Multer.File) {
     const filename: string = `${Date.now()}-${file.originalname}`;
+    const metaData = {
+      'Content-Type': file.mimetype,
+    };
     await this.minioClient.putObject(
       this.bucketName,
       filename,
       file.buffer,
       file.size,
+      metaData,
     );
     return filename;
   }
@@ -31,6 +37,7 @@ export class MinioService {
       'GET',
       this.bucketName,
       filename,
+      550000,
     );
   }
 
