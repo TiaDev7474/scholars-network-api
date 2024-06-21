@@ -21,7 +21,6 @@ export class ProfilesController {
     const { sub: userId } = user;
     return this.profilesService.create(userId, createProfileDto);
   }
-
   @Get()
   findAll() {
     return this.profilesService.findAll();

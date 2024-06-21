@@ -28,7 +28,7 @@ RUN npx prisma generate --schema=/usr/src/app/src/common/database/schema.prisma
 # Expose the port the app runs on
 EXPOSE 3000
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh", "npm", "run", "start:dev"]
+
 
 # Start the application in development mode
 CMD ["npm", "run", "start:dev"]

@@ -42,6 +42,6 @@ export class AuthController {
   }
   @Get('me')
   async profile(@GetUser() user: any) {
-    return this.authService.getAuthenticatedUser(user.id);
+    return this.authService.getAuthenticatedUser(user.sub);
   }
 }
