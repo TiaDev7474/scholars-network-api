@@ -32,12 +32,13 @@ FROM node:18-alpine As build
 
 WORKDIR /usr/src/app
 
-RUN npx prisma generate
+
 # Copy package.json and package-lock.json from development stage
 COPY --chown=node:node --from=development /usr/src/app/package*.json ./
 
 # Copy node_modules from development stage
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+RUN npx prisma generate
 
 
 
