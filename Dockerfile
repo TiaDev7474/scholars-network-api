@@ -41,11 +41,14 @@ FROM node:18-alpine As build
 
 WORKDIR /usr/src/app
 
+
 # Copy package.json and package-lock.json from development stage
 COPY --chown=node:node --from=development /usr/src/app/package*.json ./
 
 # Copy node_modules from development stage
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+
+RUN npx prisma generate --schema=/usr/src/app/src/common/database/schema.prisma
 
 # Bundle app source
 COPY --chown=node:node . .
@@ -75,7 +78,7 @@ WORKDIR /usr/src/app
 # Copy the bundled code and node_modules from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-RUN npx prisma generate --schema=/usr/src/app/src/common/database/schema.prisma
+
 
 # Switch to the node user
 USER node
