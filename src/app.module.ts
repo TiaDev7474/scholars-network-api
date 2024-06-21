@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ProfilesModule } from './profiles/profiles.module';
 import * as process from 'process';
+import { MinioModule } from "./common/lib/minio/minio.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import * as process from 'process';
       },
     }),
     ProfilesModule,
+    MinioModule,
   ],
   providers: [],
 })
