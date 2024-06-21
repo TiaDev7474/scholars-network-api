@@ -46,13 +46,13 @@ COPY --chown=node:node --from=development /usr/src/app/package*.json ./
 
 # Copy node_modules from development stage
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-RUN npx prisma generate
+
 
 
 
 # Bundle app source
 COPY --chown=node:node . .
-
+RUN npx prisma generate
 # Run the build command which creates the production bundle
 RUN npm run build
 
