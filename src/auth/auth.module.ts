@@ -7,7 +7,7 @@ import { jwtConstants } from './constant';
 import { AuthGuard } from './guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { RedisRepository } from '../common/lib/redis/redis.repository';
-import { RedisFactoryProvider } from "../common/provider/redis.factory";
+import { RedisFactoryProvider } from '../common/provider/redis.factory';
 
 @Module({
   imports: [

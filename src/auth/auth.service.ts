@@ -87,6 +87,10 @@ export class AuthService {
         user.id,
         60,
       );
+      return {
+        token: token,
+        user: user,
+      };
     } catch (e) {
       if (e instanceof UserNotFoundException) {
         throw new NotFoundException(e.message);
@@ -100,7 +104,7 @@ export class AuthService {
       token,
     );
     if (!userId) {
-      throw new BadRequestException('Invalid or expire token');
+      throw new BadRequestException('Invalid or expired token');
     }
     return userId;
   }
@@ -117,6 +121,7 @@ export class AuthService {
           password: hashedPassword,
         },
       });
+      await this.redisRepository.delete(RedisPrefixEnum.RESET_TOKEN, token);
     } catch (e) {
       if (e instanceof UserNotFoundException) {
         throw new NotFoundException(e.message);

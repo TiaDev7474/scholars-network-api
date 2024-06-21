@@ -14,12 +14,33 @@ datasource db {
 }
 
 model User {
-  id             String   @id
-  username       String
-  password       String   @db.Text
-  email          String   @unique
-  profilePicture String?
+  id        String      @id
+  username  String
+  password  String      @db.Text
+  email     String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  roles     UserRoles[] @default([USER])
+  profile   Profile?
+}
+
+model Profile {
+  id             String    @id
   bio            String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  profilePicture String?
+  dateOfBirth    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  userId         String    @unique
+  user           User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model Counrty {
+  id Int @id @default(autoincrement())
+}
+
+enum UserRoles {
+  ADMIN
+  USER
+  MODERATOR
 }

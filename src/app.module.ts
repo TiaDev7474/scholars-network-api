@@ -3,6 +3,9 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './common/database/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bull';
+import { ProfilesModule } from './profiles/profiles.module';
+import * as process from 'process';
 
 @Module({
   imports: [
@@ -12,6 +15,13 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+      },
+    }),
+    ProfilesModule,
   ],
   providers: [],
 })

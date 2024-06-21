@@ -97,7 +97,6 @@ export class UsersRepository {
       if (foundUser) {
         throw new EmailAlreadyInUseException();
       }
-      //Todo hash the password
       return this.prisma.user.create({
         data: {
           id: uuidv4(),
