@@ -14,10 +14,11 @@ import { DatabaseException } from '../common/exceptions/exception';
 @Injectable()
 export class ProfilesRepository {
   constructor(private readonly prisma: PrismaService) {}
-  create(data: Prisma.ProfileCreateInput) {
+  create(data: Prisma.ProfileCreateInput, include: Prisma.ProfileInclude) {
     try {
       return this.prisma.profile.create({
         data,
+        include,
       });
     } catch (e) {
       if (e instanceof PrismaClientValidationError) {
@@ -37,6 +38,7 @@ export class ProfilesRepository {
     cursor?: Prisma.ProfileWhereUniqueInput;
     where?: Prisma.ProfileWhereInput;
     orderBy?: Prisma.ProfileOrderByWithRelationInput;
+    include?: Prisma.ProfileInclude;
   }) {
     try {
       return this.prisma.profile.findMany({
@@ -60,6 +62,18 @@ export class ProfilesRepository {
         where: {
           id,
         },
+        include: {
+          country: true,
+          user: {
+            select: {
+              username: true,
+              createdAt: true,
+              email: true,
+              updatedAt: true,
+            },
+          },
+          desiredStudyCountries: true,
+        },
       });
     } catch (e) {
       if (e instanceof PrismaClientValidationError) {
@@ -76,12 +90,14 @@ export class ProfilesRepository {
   update(params: {
     where: Prisma.ProfileWhereUniqueInput;
     data: Prisma.ProfileUpdateInput;
+    include: Prisma.ProfileInclude;
   }) {
-    const { where, data } = params;
+    const { where, data, include } = params;
     try {
       return this.prisma.profile.update({
         data,
         where,
+        include,
       });
     } catch (e) {
       if (e instanceof PrismaClientValidationError) {

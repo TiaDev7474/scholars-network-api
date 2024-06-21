@@ -15,5 +15,4 @@ export const RedisFactoryProvider: FactoryProvider<any> = {
     });
     return redisInstance;
   },
-  inject: [],
 };

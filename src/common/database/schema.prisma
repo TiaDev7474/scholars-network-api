@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id        String      @id
+  id        String      @id @default(uuid())
   username  String
   password  String      @db.Text
   email     String      @unique
@@ -25,18 +25,56 @@ model User {
 }
 
 model Profile {
-  id             String    @id
-  bio            String?
-  profilePicture String?
-  dateOfBirth    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  userId         String    @unique
-  user           User      @relation(references: [id], fields: [userId], onDelete: Cascade)
+  id                    String                @id @default(uuid())
+  bio                   String?
+  profilePicture        String?
+  dateOfBirth           DateTime?
+  countryId             Int
+  currentStudyLevelId   Int
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country               Country               @relation("ProfileCountry", fields: [countryId], references: [id])
+  currentStudyLevel     StudyLevel            @relation(fields: [currentStudyLevelId], references: [id])
+  desiredStudyCountries DesiredStudyCountry[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  academicInterests     AcademicInterests[]
 }
 
-model Counrty {
-  id Int @id @default(autoincrement())
+model Country {
+  id              Int                   @id @default(autoincrement())
+  name            String                @unique
+  profiles        Profile[]             @relation("ProfileCountry")
+  desiredProfiles DesiredStudyCountry[]
+}
+
+model AcademicInterests {
+  id         String    @id @default(uuid())
+  profileId  String
+  academicId Int
+  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  academic   Academics @relation(fields: [academicId], references: [id])
+}
+
+model Academics {
+  id                 Int                 @id @default(autoincrement())
+  key                String
+  title              String
+  AcademicInteresrts AcademicInterests[]
+}
+
+model DesiredStudyCountry {
+  id        String  @id @default(uuid())
+  profileId String
+  countryId Int
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  country   Country @relation(fields: [countryId], references: [id])
+}
+
+model StudyLevel {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  profiles Profile[]
 }
 
 enum UserRoles {
