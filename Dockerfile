@@ -1,3 +1,12 @@
+###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
+
+FROM node:18-alpine As development
+
+# Create app directory
+WORKDIR /usr/src/app
+
 # Copy application dependency manifests to the container image.
 COPY --chown=node:node package*.json ./
 COPY entrypoint.sh ./
@@ -31,7 +40,6 @@ CMD ["npm", "run", "start:dev"]
 FROM node:18-alpine As build
 
 WORKDIR /usr/src/app
-
 
 # Copy package.json and package-lock.json from development stage
 COPY --chown=node:node --from=development /usr/src/app/package*.json ./
