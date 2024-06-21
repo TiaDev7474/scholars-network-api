@@ -59,22 +59,15 @@ export class ProfilesController {
   async update(
     @Param('id') id: string,
     @Body() updateProfileDto: UpdateProfileDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 1000,
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
+    @UploadedFile()
     profilePicture?: Express.Multer.File,
   ) {
     const data = {
       ...updateProfileDto,
     };
     if (profilePicture) {
-      data.profilePicture = await this.minioService.uploadFile(profilePicture);
+      const filename = await this.minioService.uploadFile(profilePicture);
+      data.profilePicture = await this.minioService.getFileUrl(filename);
     }
     return this.profilesService.update(id, data);
   }

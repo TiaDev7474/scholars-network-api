@@ -103,14 +103,14 @@ export class ProfilesService {
       data['desiredStudyCountries'] = {
         deleteMany: {},
         create: desiredStudyCountryIds.map((countryId) => ({
-          countryId,
+          countryId: Number(countryId),
         })),
       };
     }
     if (countryId) {
       data['country'] = {
         connect: {
-          id: countryId,
+          id: Number(countryId),
         },
       };
     }
@@ -120,7 +120,7 @@ export class ProfilesService {
         create: academicsInterestIds.map((academicsInterestId) => ({
           academic: {
             connect: {
-              id: academicsInterestId,
+              id: Number(academicsInterestId),
             },
           },
         })),
@@ -133,7 +133,12 @@ export class ProfilesService {
       },
       data,
       include: {
-        desiredStudyCountries: true,
+        desiredStudyCountries: {
+          select: {
+            country: true,
+          },
+        },
+        country: true,
         user: {
           select: {
             username: true,
