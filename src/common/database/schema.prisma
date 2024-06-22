@@ -42,7 +42,7 @@ model Profile {
 }
 
 model Scholarship {
-  id                     String                   @id
+  id                     String                   @id @default(uuid())
   officialLnk            String?
   description            String                   @db.Text
   name                   String
@@ -50,6 +50,8 @@ model Scholarship {
   hostCountries          ScholarshipHostCountry[]
   startApplicationDate   DateTime?
   endApplicationDate     DateTime?
+  organizationName       String
+  fundingType            FundingType
   applicationStartPeriod String
   studyLevels            ScholarshipLevel[]
 }
@@ -116,4 +118,9 @@ enum UserRoles {
   ADMIN
   USER
   MODERATOR
+}
+
+enum FundingType {
+  FULLY_FUNDED
+  PARTIAL_FUNDED
 }
