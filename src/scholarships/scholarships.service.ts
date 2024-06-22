@@ -80,7 +80,6 @@ export class ScholarshipsService {
                 studyLevelId: Number(filterOptions.studyLevelId),
               },
             },
-            a,
           }
         : {}),
       ...(filterOptions.countryId
