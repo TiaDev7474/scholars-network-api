@@ -32,8 +32,56 @@ export class ScholarshipsRepository {
   }
   async findAll(params: { where: Prisma.ScholarshipWhereInput }) {
     const { where } = params;
+
     return this.prisma.scholarship.findMany({
       where,
+    });
+  }
+  async getScholarshipRecommendation(userId: string, take?: number) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: {
+          select: {
+            desiredStudyCountries: {
+              select: {
+                country: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+            currentStudyLevel: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const { profile } = user;
+    return this.prisma.scholarship.findMany({
+      where: {
+        hostCountries: {
+          some: {
+            countryId: {
+              in: profile['desiredStudyCountries'].map((country) => country.id),
+            },
+          },
+        },
+        ...(take ? { take } : {}),
+        studyLevels: {
+          some: {
+            studyLevelId: {
+              in: profile['currentStudyLevel'],
+            },
+          },
+        },
+      },
     });
   }
   async findOne(params: { where: Prisma.ScholarshipWhereUniqueInput }) {

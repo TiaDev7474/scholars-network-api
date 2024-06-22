@@ -79,7 +79,7 @@ export class ScholarshipsService {
               some: {
                 studyLevelId: Number(filterOptions.studyLevelId),
               },
-            },
+            },a
           }
         : {}),
       ...(filterOptions.countryId
@@ -95,7 +95,12 @@ export class ScholarshipsService {
 
     return this.scholarshipRepository.findAll({ where });
   }
-
+  async getScholarshipRecommendation(userId: string, take?: number) {
+    return this.scholarshipRepository.getScholarshipRecommendation(
+      userId,
+      take,
+    );
+  }
   findOne(id: string) {
     return this.scholarshipRepository.findOne({
       where: {
