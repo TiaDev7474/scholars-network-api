@@ -79,7 +79,8 @@ export class ScholarshipsService {
               some: {
                 studyLevelId: Number(filterOptions.studyLevelId),
               },
-            },a
+            },
+            a,
           }
         : {}),
       ...(filterOptions.countryId
@@ -100,6 +101,9 @@ export class ScholarshipsService {
       userId,
       take,
     );
+  }
+  async getUpComingScholarship(take?: number) {
+    return this.scholarshipRepository.getUpComingScholarship(take);
   }
   findOne(id: string) {
     return this.scholarshipRepository.findOne({

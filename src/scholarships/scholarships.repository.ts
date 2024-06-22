@@ -63,6 +63,7 @@ export class ScholarshipsRepository {
     const { profile } = user;
 
     return this.prisma.scholarship.findMany({
+      ...(take ? { take } : {}),
       where: {
         hostCountries: {
           some: {
@@ -77,6 +78,18 @@ export class ScholarshipsRepository {
           some: {
             studyLevelId: profile['currentStudyLevelId'],
           },
+        },
+      },
+    });
+  }
+  async getUpComingScholarship(take?: number) {
+    const currentTimestamp = new Date().getTime();
+
+    return this.prisma.scholarship.findMany({
+      ...(take ? { take } : {}),
+      where: {
+        startApplicationDate: {
+          gt: new Date(currentTimestamp),
         },
       },
     });

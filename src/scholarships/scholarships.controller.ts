@@ -15,7 +15,7 @@ import { CreateScholarshipDto } from './dto/create-scholarship.dto';
 import { UpdateScholarshipDto } from './dto/update-scholarship.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from '../common/lib/minio/minio.service';
-import { GetUser } from "../common/decorators/user.decorator";
+import { GetUser } from '../common/decorators/user.decorator';
 
 @Controller('scholarships')
 export class ScholarshipsController {
@@ -60,6 +60,10 @@ export class ScholarshipsController {
       user.sub,
       take,
     );
+  }
+  @Get()
+  async geUpComingScholarship(@Query('take') take?: number) {
+    return this.scholarshipsService.getUpComingScholarship(Number(take));
   }
   @Get(':id')
   findOne(@Param('id') id: string) {
