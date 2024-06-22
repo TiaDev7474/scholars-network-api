@@ -11,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
+  app.enableCors({ origin: '*', methods: ['POST', 'GET', 'PATCH', 'DELETE'] });
   const config = new DocumentBuilder()
     .setTitle('Scholar Api')
     .setDescription(
