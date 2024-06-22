@@ -47,43 +47,41 @@ export class ScholarshipsRepository {
           select: {
             desiredStudyCountries: {
               select: {
-                country: {
-                  select: {
-                    id: true,
-                  },
-                },
+                countryId: true,
               },
             },
-            currentStudyLevel: {
-              select: {
-                id: true,
-              },
-            },
+            currentStudyLevelId: true,
           },
         },
       },
     });
+
+    if (!user) {
+      throw new Error(`User with id ${userId} not found.`);
+    }
+
     const { profile } = user;
+
     return this.prisma.scholarship.findMany({
       where: {
         hostCountries: {
           some: {
             countryId: {
-              in: profile['desiredStudyCountries'].map((country) => country.id),
+              in: profile['desiredStudyCountries'].map(
+                (country) => country.countryId,
+              ),
             },
           },
         },
-        ...(take ? { take } : {}),
         studyLevels: {
           some: {
-            studyLevelId: {
-              in: profile['currentStudyLevel'],
-            },
+            studyLevelId: profile['currentStudyLevelId'],
           },
         },
       },
     });
   }
+
   async findOne(params: { where: Prisma.ScholarshipWhereUniqueInput }) {
     const { where } = params;
     return this.prisma.scholarship.findUnique({
