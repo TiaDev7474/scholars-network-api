@@ -3,7 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
+  ParseFilePipeBuilder,
   Patch,
   Post,
   UploadedFile,
@@ -13,8 +15,9 @@ import { ProfilesService } from './profiles.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { GetUser } from '../common/decorators/user.decorator';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from '../common/lib/minio/minio.service';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -24,19 +27,21 @@ export class ProfilesController {
   ) {}
   //todo: Add file interceptor for file upload
   @Post()
-  @UseInterceptors(FilesInterceptor('profilePicture'))
+  @UseInterceptors(FileInterceptor('profilePicture'))
   async create(
     @GetUser() user: any,
     @Body() createProfileDto: CreateProfileDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile()
+    profilePicture?: Express.Multer.File,
   ) {
     const { sub: userId } = user;
+    console.log(profilePicture);
     const data = {
-      profilePicture: null,
       ...createProfileDto,
     };
-    if (file) {
-      data.profilePicture = await this.minioService.uploadFile(file);
+    if (profilePicture) {
+      const filename = await this.minioService.uploadFile(profilePicture);
+      data.profilePicture = await this.minioService.getFileUrl(filename);
     }
     return this.profilesService.create(userId, data);
   }
@@ -50,23 +55,40 @@ export class ProfilesController {
     return this.profilesService.findOne(id);
   }
   @Patch(':id')
-  @UseInterceptors(FilesInterceptor('profilePicture'))
+  @UseInterceptors(FileInterceptor('profilePicture'))
   async update(
     @Param('id') id: string,
     @Body() updateProfileDto: UpdateProfileDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile()
+    profilePicture?: Express.Multer.File,
   ) {
     const data = {
-      profilePicture: null,
       ...updateProfileDto,
     };
-    if (file) {
-      data.profilePicture = await this.minioService.uploadFile(file);
+    if (profilePicture) {
+      const filename = await this.minioService.uploadFile(profilePicture);
+      data.profilePicture = await this.minioService.getFileUrl(filename);
     }
     return this.profilesService.update(id, data);
   }
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.profilesService.remove(id);
+  }
+
+  @Public()
+  @Get('country')
+  async getAllCountries() {
+    return this.profilesService.getAllCountry();
+  }
+  @Public()
+  @Get('study-level')
+  async getAllStudyLevel() {
+    return this.profilesService.getAllStudyLevel();
+  }
+  @Public()
+  @Get('academics')
+  async getAllAcademics() {
+    return this.profilesService.getAllAcademics();
   }
 }

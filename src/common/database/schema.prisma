@@ -41,19 +41,52 @@ model Profile {
   academicInterests     AcademicInterests[]
 }
 
+model Scholarship {
+  id                     String                   @id
+  officialLnk            String?
+  description            String                   @db.Text
+  name                   String
+  coverPhoto             String?
+  hostCountries          ScholarshipHostCountry[]
+  startApplicationDate   DateTime?
+  endApplicationDate     DateTime?
+  applicationStartPeriod String
+  studyLevels            ScholarshipLevel[]
+}
+
 model Country {
-  id              Int                   @id @default(autoincrement())
-  name            String                @unique
-  profiles        Profile[]             @relation("ProfileCountry")
-  desiredProfiles DesiredStudyCountry[]
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique
+  profiles               Profile[]                @relation("ProfileCountry")
+  desiredProfiles        DesiredStudyCountry[]
+  scholarshipHostCountry ScholarshipHostCountry[]
+}
+
+model ScholarshipHostCountry {
+  countryId     Int
+  country       Country     @relation(references: [id], fields: [countryId])
+  scholarshipId String
+  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId], onDelete: Cascade)
+
+  @@id([countryId, scholarshipId])
+}
+
+model ScholarshipLevel {
+  studyLevelId  Int
+  studyLevel    StudyLevel  @relation(references: [id], fields: [studyLevelId])
+  scholarshipId String
+  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId])
+
+  @@id([studyLevelId])
 }
 
 model AcademicInterests {
-  id         String    @id @default(uuid())
   profileId  String
   academicId Int
   profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   academic   Academics @relation(fields: [academicId], references: [id])
+
+  @@id([academicId, profileId])
 }
 
 model Academics {
@@ -64,17 +97,19 @@ model Academics {
 }
 
 model DesiredStudyCountry {
-  id        String  @id @default(uuid())
   profileId String
   countryId Int
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   country   Country @relation(fields: [countryId], references: [id])
+
+  @@id([profileId, countryId])
 }
 
 model StudyLevel {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  profiles Profile[]
+  id               Int                @id @default(autoincrement())
+  name             String             @unique
+  profiles         Profile[]
+  ScholarshipLevel ScholarshipLevel[]
 }
 
 enum UserRoles {

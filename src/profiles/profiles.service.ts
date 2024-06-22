@@ -26,26 +26,26 @@ export class ProfilesService {
       },
       currentStudyLevel: {
         connect: {
-          id: currentStudyLevelId,
+          id: Number(currentStudyLevelId),
         },
       },
       country: {
         connect: {
-          id: countryId,
+          id: Number(countryId),
         },
       },
       academicInterests: {
         create: academicsInterestIds.map((academicsInterestId) => ({
           academic: {
             connect: {
-              id: academicsInterestId,
+              id: Number(academicsInterestId),
             },
           },
         })),
       },
       desiredStudyCountries: {
         create: desiredStudyCountryIds.map((countryId) => ({
-          countryId,
+          countryId: Number(countryId),
         })),
       },
     };
@@ -54,7 +54,12 @@ export class ProfilesService {
         ...profileData,
       },
       {
-        desiredStudyCountries: true,
+        desiredStudyCountries: {
+          select: {
+            country: true,
+          },
+        },
+        currentStudyLevel: true,
         country: true,
         user: {
           select: {
@@ -98,14 +103,14 @@ export class ProfilesService {
       data['desiredStudyCountries'] = {
         deleteMany: {},
         create: desiredStudyCountryIds.map((countryId) => ({
-          countryId,
+          countryId: Number(countryId),
         })),
       };
     }
     if (countryId) {
       data['country'] = {
         connect: {
-          id: countryId,
+          id: Number(countryId),
         },
       };
     }
@@ -115,7 +120,7 @@ export class ProfilesService {
         create: academicsInterestIds.map((academicsInterestId) => ({
           academic: {
             connect: {
-              id: academicsInterestId,
+              id: Number(academicsInterestId),
             },
           },
         })),
@@ -128,7 +133,12 @@ export class ProfilesService {
       },
       data,
       include: {
-        desiredStudyCountries: true,
+        desiredStudyCountries: {
+          select: {
+            country: true,
+          },
+        },
+        country: true,
         user: {
           select: {
             username: true,
@@ -143,5 +153,14 @@ export class ProfilesService {
 
   remove(id: string) {
     return this.profileRepository.remove(id);
+  }
+  async getAllCountry() {
+    return this.profileRepository.getAllCountry();
+  }
+  async getAllAcademics() {
+    return this.profileRepository.getAllAcademics();
+  }
+  async getAllStudyLevel() {
+    return this.profileRepository.getAllStudyLevel();
   }
 }
