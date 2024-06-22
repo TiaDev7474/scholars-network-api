@@ -77,8 +77,7 @@ export class ScholarshipsService {
         ? {
             studyLevels: {
               some: {
-                id: parseInt(filterOptions.studyLevelId),
-                mode: 'insensitive',
+                studyLevelId: Number(filterOptions.studyLevelId),
               },
             },
           }
@@ -87,8 +86,7 @@ export class ScholarshipsService {
         ? {
             hostCountries: {
               some: {
-                id: parseInt(filterOptions.countryId),
-                mode: 'insensitive',
+                countryId: parseInt(filterOptions.countryId),
               },
             },
           }
