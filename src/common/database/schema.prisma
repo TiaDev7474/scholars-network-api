@@ -44,7 +44,7 @@ model Profile {
 
 model Scholarship {
   id                     String                   @id @default(uuid())
-  officialLnk            String?
+  officialLink           String?
   description            String                   @db.Text
   name                   String
   coverPhoto             String?
@@ -90,7 +90,7 @@ model ScholarshipLevel {
   scholarshipId String
   scholarship   Scholarship @relation(references: [id], fields: [scholarshipId])
 
-  @@id([studyLevelId])
+  @@id([studyLevelId, scholarshipId])
 }
 
 model AcademicInterests {

@@ -53,8 +53,8 @@ export class ScholarshipsController {
   }
   @Get('/recommendation')
   getScholarshipRecommendation(
-    @Query('take') take: number,
     @GetUser() user: any,
+    @Query('take') take?: number,
   ) {
     return this.scholarshipsService.getScholarshipRecommendation(
       user.sub,

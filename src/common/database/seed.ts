@@ -1,5 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import { academics , countryNames , studyLevels } from "./data/data";
+import { Prisma, PrismaClient } from '@prisma/client';
+import {
+  academics,
+  countryNames,
+  scholarships,
+  studyLevels,
+} from './data/data';
 const prisma = new PrismaClient();
 async function main() {
   console.log('=========Seeding country table===========');
@@ -11,7 +16,7 @@ async function main() {
   console.log('=========Seeding studyLevel table===========');
   await prisma.studyLevel.createMany({
     data: studyLevels,
-    skipDuplicates: true
+    skipDuplicates: true,
   });
   console.log('=========StudyLevel seeded===========');
   console.log('=========Seeding academics table===========');
@@ -20,9 +25,35 @@ async function main() {
       title: academic.title,
       key: academic.key,
     })),
-    skipDuplicates: true
+    skipDuplicates: true,
   });
   console.log('=========Academics seeded===========');
+  console.log('=========Seeding scholarships table===========');
+  const createScholarships = scholarships.map(
+    ({ studyLevelsIds, hostCountriesIds, ...rest }) =>
+      prisma.scholarship.create({
+        data: {
+          ...rest,
+          studyLevels: {
+            create: studyLevelsIds.map((id) => ({
+              studyLevel: {
+                connect: { id },
+              },
+            })),
+          },
+          hostCountries: {
+            create: hostCountriesIds.map((id) => ({
+              country: {
+                connect: { id },
+              },
+            })),
+          },
+        },
+      }),
+  );
+
+  await Promise.all(createScholarships);
+  console.log('=========scholarship seeded===========');
 }
 main()
   .then(async () => {

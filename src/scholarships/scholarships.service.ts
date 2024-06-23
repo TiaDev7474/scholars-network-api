@@ -60,15 +60,23 @@ export class ScholarshipsService {
       ...(filterOptions.q
         ? {
             OR: [
-              { name: { contains: filterOptions.q, mode: 'insensitive' } },
               {
-                organizationName: {
-                  contains: filterOptions.q,
+                name: {
+                  contains: filterOptions.q.toLowerCase(),
                   mode: 'insensitive',
                 },
               },
               {
-                description: { contains: filterOptions.q, mode: 'insensitive' },
+                organizationName: {
+                  contains: filterOptions.q.toLowerCase(),
+                  mode: 'insensitive',
+                },
+              },
+              {
+                description: {
+                  contains: filterOptions.q.toLowerCase(),
+                  mode: 'insensitive',
+                },
               },
             ],
           }
