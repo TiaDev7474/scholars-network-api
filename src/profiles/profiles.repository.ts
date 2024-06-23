@@ -129,9 +129,12 @@ export class ProfilesRepository {
     }
   }
   async getAllCountry() {
-     return this.prisma.country.findMany()
-  }
+    console.log("I am in country repo")
+    const countries = await this.prisma.country.findMany({
+    })
+    return countries
 
+  }
   async getAllAcademics(){
      return this.prisma.academics.findMany()
   }

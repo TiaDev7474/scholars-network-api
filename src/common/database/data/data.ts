@@ -149,8 +149,8 @@ const scholarships = [
     startApplicationDate: new Date('2024-01-01'),
     endApplicationDate: new Date('2024-03-31'),
     applicationStartPeriod: 'Spring 2024',
-    hostCountriesIds: [1, 2],
-    studyLevelsIds: [1, 2, 3],
+    hostCountriesIds: [937, 938],
+    studyLevelsIds: [37, 38, 39],
   },
   {
     name: 'Tech Innovators Scholarship',
@@ -163,8 +163,8 @@ const scholarships = [
     startApplicationDate: new Date('2024-05-01'),
     endApplicationDate: new Date('2024-07-31'),
     applicationStartPeriod: 'Summer 2024',
-    hostCountriesIds: [1, 3, 4],
-    studyLevelsIds: [2, 3],
+    hostCountriesIds: [940, 941],
+    studyLevelsIds: [38, 39],
   },
   {
     name: 'Future Leaders Scholarship',
@@ -177,8 +177,8 @@ const scholarships = [
     startApplicationDate: new Date('2024-09-01'),
     endApplicationDate: new Date('2024-11-30'),
     applicationStartPeriod: 'Fall 2024',
-    hostCountriesIds: [1, 2, 5],
-    studyLevelsIds: [1, 3],
+    hostCountriesIds: [980, 981, 982],
+    studyLevelsIds: [37, 39],
   },
   {
     name: 'Healthcare Excellence Scholarship',
@@ -192,8 +192,8 @@ const scholarships = [
     startApplicationDate: new Date('2024-02-01'),
     endApplicationDate: new Date('2024-04-30'),
     applicationStartPeriod: 'Spring 2024',
-    hostCountriesIds: [2, 3],
-    studyLevelsIds: [1, 2, 3],
+    hostCountriesIds: [1000, 1001],
+    studyLevelsIds: [37, 38, 39],
   },
   {
     name: 'Arts and Culture Scholarship',
@@ -206,8 +206,8 @@ const scholarships = [
     startApplicationDate: new Date('2024-06-01'),
     endApplicationDate: new Date('2024-08-31'),
     applicationStartPeriod: 'Summer 2024',
-    hostCountriesIds: [1, 4],
-    studyLevelsIds: [2, 3],
+    hostCountriesIds: [961, 962],
+    studyLevelsIds: [38, 39],
   },
 ];
 
