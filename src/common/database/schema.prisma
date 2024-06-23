@@ -39,6 +39,7 @@ model Profile {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   academicInterests     AcademicInterests[]
+  savedScholarships     SaveScholarship[]
 }
 
 model Scholarship {
@@ -54,6 +55,16 @@ model Scholarship {
   fundingType            FundingType
   applicationStartPeriod String
   studyLevels            ScholarshipLevel[]
+  savedBy                SaveScholarship[]
+}
+
+model SaveScholarship {
+  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId], onDelete: Cascade)
+  scholarshipId String
+  profileId     String
+  profile       Profile     @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  @@id([profileId, scholarshipId])
 }
 
 model Country {
