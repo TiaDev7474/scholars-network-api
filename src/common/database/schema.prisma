@@ -14,17 +14,38 @@ datasource db {
 }
 
 model User {
-  id                   String       @id @default(uuid())
-  username             String
-  password             String       @db.Text
-  email                String       @unique
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  roles                UserRoles[]  @default([USER])
-  profile              Profile?
+  id                     String          @id @default(uuid())
+  username               String
+  password               String          @db.Text
+  email                  String          @unique
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  roles                  UserRoles[]     @default([USER])
+  profile                Profile?
   // https://stackoverflow.com/questions/73942737/many-to-many-self-relation-prisma-one-field
-  connections          Connection[] @relation("UserConnections")
-  symmetricConnections Connection[] @relation("UserSymmetricConnections")
+  connections            Connection[]    @relation("UserConnections")
+  symmetricConnections   Connection[]    @relation("UserSymmetricConnections")
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+}
+
+model FriendRequest {
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender   User @relation("SentFriendRequests", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 model Profile {
