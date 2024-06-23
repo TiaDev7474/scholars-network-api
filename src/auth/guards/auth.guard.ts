@@ -9,6 +9,7 @@ import { jwtConstants } from '../constant';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
+import { WsException } from "@nestjs/websockets";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,14 +28,14 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new WsException('Invalid credentials.');
     }
     try {
       request['user'] = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
     } catch (e) {
-      throw new UnauthorizedException();
+      throw new WsException('Invalid credentials.');
     }
     return true;
   }

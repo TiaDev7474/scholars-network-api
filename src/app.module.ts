@@ -9,6 +9,7 @@ import * as process from 'process';
 import { MinioModule } from "./common/lib/minio/minio.module";
 import { ScholarshipsModule } from './scholarships/scholarships.module';
 import { ConnectionsModule } from './connections/connections.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConnectionsModule } from './connections/connections.module';
     MinioModule,
     ScholarshipsModule,
     ConnectionsModule,
+    ChatModule,
   ],
   providers: [],
 })
