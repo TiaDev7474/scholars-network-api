@@ -1,11 +1,11 @@
 import {
-  IsString,
-  IsOptional,
-  IsDate,
-  IsEnum,
-  IsNumberString,
-  IsArray,
-} from 'class-validator';
+  IsString ,
+  IsOptional ,
+  IsDate ,
+  IsEnum ,
+  IsNumberString ,
+  IsArray , ArrayNotEmpty
+} from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum FundingType {
@@ -25,11 +25,6 @@ export class CreateScholarshipDto {
   @ApiProperty()
   @IsString()
   description: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  coverPhoto?: string;
 
   @ApiProperty()
   @IsString()
@@ -54,12 +49,12 @@ export class CreateScholarshipDto {
   applicationStartPeriod: string;
 
   @ApiProperty()
-  @IsNumberString()
   @IsArray()
+  @ArrayNotEmpty()
   hostCountriesIds: number[];
 
   @ApiProperty()
-  @IsNumberString()
   @IsArray()
+  @ArrayNotEmpty()
   studyLevelsIds: number[];
 }

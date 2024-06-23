@@ -14,14 +14,17 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  username  String
-  password  String      @db.Text
-  email     String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  roles     UserRoles[] @default([USER])
-  profile   Profile?
+  id                   String       @id @default(uuid())
+  username             String
+  password             String       @db.Text
+  email                String       @unique
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  roles                UserRoles[]  @default([USER])
+  profile              Profile?
+  // https://stackoverflow.com/questions/73942737/many-to-many-self-relation-prisma-one-field
+  connections          Connection[] @relation("UserConnections")
+  symmetricConnections Connection[] @relation("UserSymmetricConnections")
 }
 
 model Profile {
@@ -56,6 +59,15 @@ model Scholarship {
   applicationStartPeriod String
   studyLevels            ScholarshipLevel[]
   savedBy                SaveScholarship[]
+}
+
+model Connection {
+  userId   String
+  friendId String
+  user     User   @relation("UserConnections", fields: [userId], references: [id])
+  friend   User   @relation("UserSymmetricConnections", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
 }
 
 model SaveScholarship {
