@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Query } from '@nestjs/common';
 import { ConnectionsService } from './connections.service';
 import { CreateConnectionDto } from './dto/create-connection.dto';
 import { GetUser } from '../common/decorators/user.decorator';
@@ -15,11 +8,12 @@ import { RequestResponseDto } from './dto/request-response.dto';
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
 
-  @Post('request')
+  @Post('/request')
   create(
     @GetUser() user: any,
     @Body() createConnectionDto: CreateConnectionDto,
   ) {
+    console.log(user, createConnectionDto);
     return this.connectionsService.sendConnectionRequest({
       senderId: user.sub,
       receiverId: createConnectionDto.receiverId,
@@ -55,6 +49,18 @@ export class ConnectionsController {
     @Query('limit') limit?: number,
   ) {
     return this.connectionsService.getReceivedRequests({
+      page,
+      limit,
+      userId: user.sub,
+    });
+  }
+  @Get()
+  async getUserConnections(
+    @GetUser() user: any,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.connectionsService.getUsersConnections({
       page,
       limit,
       userId: user.sub,

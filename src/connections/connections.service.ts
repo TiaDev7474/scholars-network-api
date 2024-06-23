@@ -18,8 +18,8 @@ export class ConnectionsService {
       userId: userId,
     };
     return this.connectionRepository.getUsersConnections({
-      page,
-      limit,
+      page: page,
+      limit: limit,
       where: where,
     });
   }
@@ -50,8 +50,6 @@ export class ConnectionsService {
         receiver: {
           select: {
             username: true,
-          },
-          include: {
             profile: {
               select: {
                 profilePicture: true,
@@ -69,8 +67,8 @@ export class ConnectionsService {
   }) {
     const { page = 1, limit = 10, userId } = params;
     return this.connectionRepository.getRequests({
-      page,
-      limit,
+      page: page,
+      limit: limit,
       where: {
         receiverId: userId,
       },
@@ -78,8 +76,6 @@ export class ConnectionsService {
         sender: {
           select: {
             username: true,
-          },
-          include: {
             profile: {
               select: {
                 profilePicture: true,

@@ -22,9 +22,9 @@ export class ConnectionsRepository {
     limit: number;
     where: Prisma.ConnectionWhereInput;
   }) {
-    const { page, limit, where } = params;
-    const skip = (page - 1) * limit;
-    const take = limit;
+    const { page = 1, limit = 10, where } = params;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
     try {
       const totalCount = this.prisma.connection.count({
         where,
@@ -36,8 +36,6 @@ export class ConnectionsRepository {
           friend: {
             select: {
               username: true,
-            },
-            include: {
               profile: {
                 select: {
                   id: true,
@@ -77,12 +75,12 @@ export class ConnectionsRepository {
         },
       });
       if (existingConnection) {
-        throw new HttpException(
+        return new HttpException(
           'Connection Request already exists',
           HttpStatus.CONFLICT,
         );
       }
-      await this.prisma.friendRequest.create({
+      return await this.prisma.friendRequest.create({
         data: {
           sender: {
             connect: {
@@ -124,9 +122,10 @@ export class ConnectionsRepository {
     where: Prisma.FriendRequestWhereInput;
     include: Prisma.FriendRequestInclude;
   }) {
-    const { page, limit, where, include } = params;
-    const skip = (page - 1) * limit;
-    const take = limit;
+    const { page = 1, limit = 10, where, include } = params;
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
     return this.prisma.friendRequest.findMany({
       where,
       include,
@@ -151,18 +150,24 @@ export class ConnectionsRepository {
         },
       });
       if (!existingFriendRequest) {
-        throw new HttpException(
+        return new HttpException(
           'Friend request not found.',
           HttpStatus.NOT_FOUND,
         );
       }
       if (action == FriendRequestStatus.ACCEPTED) {
+        if (existingFriendRequest['status'] == FriendRequestStatus.ACCEPTED) {
+          return new HttpException(
+            'Friend request already accepted.',
+            HttpStatus.CONFLICT,
+          );
+        }
         await this.initializeConnection({
           userId: receiverId,
           friendId: senderId,
         });
       }
-      await this.prisma.friendRequest.update({
+      return await this.prisma.friendRequest.update({
         data: {
           status:
             action == FriendRequestStatus.ACCEPTED
