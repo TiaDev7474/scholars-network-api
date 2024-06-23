@@ -1,34 +1,63 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { ConnectionsService } from './connections.service';
 import { CreateConnectionDto } from './dto/create-connection.dto';
-import { UpdateConnectionDto } from './dto/update-connection.dto';
+import { GetUser } from '../common/decorators/user.decorator';
+import { RequestResponseDto } from './dto/request-response.dto';
 
 @Controller('connections')
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
 
-  @Post()
-  create(@Body() createConnectionDto: CreateConnectionDto) {
-    return this.connectionsService.create(createConnectionDto);
+  @Post('request')
+  create(
+    @GetUser() user: any,
+    @Body() createConnectionDto: CreateConnectionDto,
+  ) {
+    return this.connectionsService.sendConnectionRequest({
+      senderId: user.sub,
+      receiverId: createConnectionDto.receiverId,
+    });
   }
-
-  @Get()
-  findAll() {
-    return this.connectionsService.findAll();
+  @Patch('reply')
+  async acceptOrDeclineRequest(
+    @Body() requestResponseDto: RequestResponseDto,
+    @GetUser() user: any,
+  ) {
+    return this.connectionsService.acceptOrDeclineRequest({
+      receiverId: user.sub,
+      senderId: requestResponseDto.senderId,
+      action: requestResponseDto.action,
+    });
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.connectionsService.findOne(+id);
+  @Get('request/sent')
+  async getSentRequest(
+    @GetUser() user: any,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.connectionsService.getSentRequests({
+      page,
+      limit,
+      userId: user.sub,
+    });
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConnectionDto: UpdateConnectionDto) {
-    return this.connectionsService.update(+id, updateConnectionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.connectionsService.remove(+id);
+  @Get('request/received')
+  async getReceivedRequest(
+    @GetUser() user: any,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.connectionsService.getReceivedRequests({
+      page,
+      limit,
+      userId: user.sub,
+    });
   }
 }

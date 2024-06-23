@@ -11,17 +11,58 @@ import {
   PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
 import { DatabaseException } from '../common/exceptions/exception';
-import { FriendRequestStatus } from '@prisma/client';
+import { FriendRequestStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ConnectionsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUsersConnections(params: { userId: string }) {}
+  async getUsersConnections(params: {
+    page: number;
+    limit: number;
+    where: Prisma.ConnectionWhereInput;
+  }) {
+    const { page, limit, where } = params;
+    const skip = (page - 1) * limit;
+    const take = limit;
+    try {
+      const totalCount = this.prisma.connection.count({
+        where,
+      });
 
-  async getConnectionRequest() {}
-
-  async getRequestSent() {}
+      const userConnections = await this.prisma.connection.findMany({
+        where,
+        include: {
+          friend: {
+            select: {
+              username: true,
+            },
+            include: {
+              profile: {
+                select: {
+                  id: true,
+                  profilePicture: true,
+                },
+              },
+            },
+          },
+        },
+        take,
+        skip,
+      });
+      return {
+        totalCount,
+        page,
+        limit,
+        connections: userConnections,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'An error occurred while fetching connections.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   async sendConnectionRequest(params: {
     senderId: string;
@@ -77,19 +118,108 @@ export class ConnectionsRepository {
       throw new InternalServerErrorException();
     }
   }
-  async acceptFriendRequest(params: { receiverId: string; senderId: string }) {
-    const { senderId, receiverId } = params;
-    const existingConnection = await this.prisma.friendRequest.findFirst({
-      where: {
-        senderId,
-        receiverId,
-      },
+  async getRequests(params: {
+    page: number;
+    limit: number;
+    where: Prisma.FriendRequestWhereInput;
+    include: Prisma.FriendRequestInclude;
+  }) {
+    const { page, limit, where, include } = params;
+    const skip = (page - 1) * limit;
+    const take = limit;
+    return this.prisma.friendRequest.findMany({
+      where,
+      include,
+      take,
+      skip,
     });
-    if (!existingConnection) {
+  }
+  async acceptOrDeclineFriendRequest(params: {
+    receiverId: string;
+    senderId: string;
+    action: FriendRequestStatus;
+  }) {
+    const { senderId, receiverId, action } = params;
+
+    try {
+      const existingFriendRequest = await this.prisma.friendRequest.findUnique({
+        where: {
+          senderId_receiverId: {
+            senderId,
+            receiverId,
+          },
+        },
+      });
+      if (!existingFriendRequest) {
+        throw new HttpException(
+          'Friend request not found.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      if (action == FriendRequestStatus.ACCEPTED) {
+        await this.initializeConnection({
+          userId: receiverId,
+          friendId: senderId,
+        });
+      }
+      await this.prisma.friendRequest.update({
+        data: {
+          status:
+            action == FriendRequestStatus.ACCEPTED
+              ? FriendRequestStatus.ACCEPTED
+              : FriendRequestStatus.DECLINED,
+        },
+        where: {
+          senderId_receiverId: {
+            senderId,
+            receiverId,
+          },
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
-        'Connection Request already do not exist',
-        HttpStatus.NOT_FOUND,
+        'An unexpected error occurred while accepting the friend request.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+  async initializeConnection(params: { userId: string; friendId: string }) {
+    const { userId, friendId } = params;
+
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        connections: {
+          create: {
+            friend: {
+              connect: {
+                id: friendId,
+              },
+            },
+          },
+        },
+      },
+    });
+    await this.prisma.user.update({
+      where: {
+        id: friendId,
+      },
+      data: {
+        connections: {
+          create: {
+            friend: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }
