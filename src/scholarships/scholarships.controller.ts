@@ -61,7 +61,7 @@ export class ScholarshipsController {
       take,
     );
   }
-  @Get()
+  @Get('/upcoming')
   async geUpComingScholarship(@Query('take') take?: number) {
     return this.scholarshipsService.getUpComingScholarship(Number(take));
   }
@@ -70,7 +70,7 @@ export class ScholarshipsController {
     return this.scholarshipsService.findOne(id);
   }
   @Patch('/:id/save')
-  async saveScholarship(@GetUser() user: any, @Param(id) id: string) {
+  async saveScholarship(@GetUser() user: any, @Param('id') id: string) {
     return this.scholarshipsService.saveScholarship(id, user.sub);
   }
   @Patch(':id')
