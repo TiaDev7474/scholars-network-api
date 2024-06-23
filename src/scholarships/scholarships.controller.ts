@@ -53,15 +53,15 @@ export class ScholarshipsController {
   }
   @Get('/recommendation')
   getScholarshipRecommendation(
-    @Query('take') take: number,
     @GetUser() user: any,
+    @Query('take') take?: number,
   ) {
     return this.scholarshipsService.getScholarshipRecommendation(
       user.sub,
       take,
     );
   }
-  @Get()
+  @Get('/upcoming')
   async geUpComingScholarship(@Query('take') take?: number) {
     return this.scholarshipsService.getUpComingScholarship(Number(take));
   }
@@ -69,7 +69,11 @@ export class ScholarshipsController {
   findOne(@Param('id') id: string) {
     return this.scholarshipsService.findOne(id);
   }
-
+  @Patch(':id/save')
+  async saveScholarship(@GetUser() user: any, @Param('id') id: string) {
+    console.log(id, user.sub);
+    return this.scholarshipsService.saveScholarship(id, user.sub);
+  }
   @Patch(':id')
   @UseInterceptors(FileInterceptor('coverPhoto'))
   async update(

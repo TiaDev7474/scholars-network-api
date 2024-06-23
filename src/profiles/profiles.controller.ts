@@ -3,9 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
-  ParseFilePipeBuilder,
   Patch,
   Post,
   UploadedFile,
@@ -17,7 +15,6 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { GetUser } from '../common/decorators/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from '../common/lib/minio/minio.service';
-import { Public } from '../common/decorators/public.decorator';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -49,11 +46,26 @@ export class ProfilesController {
   findAll() {
     return this.profilesService.findAll();
   }
+  @Get('/country')
+  getAllCountries() {
+    console.log('I am in country controller');
+    return this.profilesService.getAllCountry();
+  }
 
+  @Get('/study-level')
+  async getAllStudyLevel() {
+    return this.profilesService.getAllStudyLevel();
+  }
+
+  @Get('/academics')
+  async getAllAcademics() {
+    return this.profilesService.getAllAcademics();
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.profilesService.findOne(id);
   }
+
   @Patch(':id')
   @UseInterceptors(FileInterceptor('profilePicture'))
   async update(
@@ -74,21 +86,5 @@ export class ProfilesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.profilesService.remove(id);
-  }
-
-  @Public()
-  @Get('country')
-  async getAllCountries() {
-    return this.profilesService.getAllCountry();
-  }
-  @Public()
-  @Get('study-level')
-  async getAllStudyLevel() {
-    return this.profilesService.getAllStudyLevel();
-  }
-  @Public()
-  @Get('academics')
-  async getAllAcademics() {
-    return this.profilesService.getAllAcademics();
   }
 }

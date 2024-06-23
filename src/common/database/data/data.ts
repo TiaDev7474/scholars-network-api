@@ -1,3 +1,5 @@
+import { FundingType } from '@prisma/client';
+
 const academics = [
   { key: 'medicine', title: 'Medicine' },
   { key: 'engineering', title: 'Engineering' },
@@ -134,4 +136,79 @@ const countryNames = [
   'Cyprus',
 ];
 
-export { academics, countryNames, studyLevels };
+const scholarships = [
+  {
+    name: 'Global Excellence Scholarship',
+    officialLink: 'https://www.universityexample.edu/global-excellence',
+    description:
+      'The Global Excellence Scholarship aims to attract high-performing students from around the world to study at our university.',
+    coverPhoto:
+      'https://www.universityexample.edu/images/global-excellence.jpg',
+    organizationName: 'University Example',
+    fundingType: FundingType.FULLY_FUNDED,
+    startApplicationDate: new Date('2024-01-01'),
+    endApplicationDate: new Date('2024-03-31'),
+    applicationStartPeriod: 'Spring 2024',
+    hostCountriesIds: [937, 938],
+    studyLevelsIds: [37, 38, 39],
+  },
+  {
+    name: 'Tech Innovators Scholarship',
+    officialLink: 'https://www.techuniversity.edu/innovators',
+    description:
+      'This scholarship supports outstanding students pursuing degrees in technology and innovation.',
+    coverPhoto: 'https://www.techuniversity.edu/images/innovators.jpg',
+    organizationName: 'Tech University',
+    fundingType: FundingType.PARTIAL_FUNDED,
+    startApplicationDate: new Date('2024-05-01'),
+    endApplicationDate: new Date('2024-07-31'),
+    applicationStartPeriod: 'Summer 2024',
+    hostCountriesIds: [940, 941],
+    studyLevelsIds: [38, 39],
+  },
+  {
+    name: 'Future Leaders Scholarship',
+    officialLink: 'https://www.leadersacademy.edu/future-leaders',
+    description:
+      'The Future Leaders Scholarship is designed to support students who have demonstrated leadership potential in their communities.',
+    coverPhoto: 'https://www.leadersacademy.edu/images/future-leaders.jpg',
+    organizationName: 'Leaders Academy',
+    fundingType: FundingType.FULLY_FUNDED,
+    startApplicationDate: new Date('2024-09-01'),
+    endApplicationDate: new Date('2024-11-30'),
+    applicationStartPeriod: 'Fall 2024',
+    hostCountriesIds: [980, 981, 982],
+    studyLevelsIds: [37, 39],
+  },
+  {
+    name: 'Healthcare Excellence Scholarship',
+    officialLink: 'https://www.healthuniversity.edu/healthcare-excellence',
+    description:
+      'This scholarship is awarded to students who have shown exceptional promise in the field of healthcare.',
+    coverPhoto:
+      'https://www.healthuniversity.edu/images/healthcare-excellence.jpg',
+    organizationName: 'Health University',
+    fundingType: FundingType.PARTIAL_FUNDED,
+    startApplicationDate: new Date('2024-02-01'),
+    endApplicationDate: new Date('2024-04-30'),
+    applicationStartPeriod: 'Spring 2024',
+    hostCountriesIds: [1000, 1001],
+    studyLevelsIds: [37, 38, 39],
+  },
+  {
+    name: 'Arts and Culture Scholarship',
+    officialLink: 'https://www.artsacademy.edu/arts-culture',
+    description:
+      'The Arts and Culture Scholarship supports students pursuing studies in arts, culture, and humanities.',
+    coverPhoto: 'https://www.artsacademy.edu/images/arts-culture.jpg',
+    organizationName: 'Arts Academy',
+    fundingType: FundingType.FULLY_FUNDED,
+    startApplicationDate: new Date('2024-06-01'),
+    endApplicationDate: new Date('2024-08-31'),
+    applicationStartPeriod: 'Summer 2024',
+    hostCountriesIds: [961, 962],
+    studyLevelsIds: [38, 39],
+  },
+];
+
+export { academics, countryNames, studyLevels, scholarships };

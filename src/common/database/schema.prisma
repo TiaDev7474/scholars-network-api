@@ -14,14 +14,38 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  username  String
-  password  String      @db.Text
-  email     String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  roles     UserRoles[] @default([USER])
-  profile   Profile?
+  id                     String          @id @default(uuid())
+  username               String
+  password               String          @db.Text
+  email                  String          @unique
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  roles                  UserRoles[]     @default([USER])
+  profile                Profile?
+  // https://stackoverflow.com/questions/73942737/many-to-many-self-relation-prisma-one-field
+  connections            Connection[]    @relation("UserConnections")
+  symmetricConnections   Connection[]    @relation("UserSymmetricConnections")
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+}
+
+model FriendRequest {
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender   User @relation("SentFriendRequests", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 model Profile {
@@ -33,17 +57,18 @@ model Profile {
   currentStudyLevelId   Int
   userId                String                @unique
   user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  country               Country               @relation("ProfileCountry", fields: [countryId], references: [id])
-  currentStudyLevel     StudyLevel            @relation(fields: [currentStudyLevelId], references: [id])
+  country               Country               @relation("ProfileCountry", fields: [countryId], references: [id], onDelete: SetDefault)
+  currentStudyLevel     StudyLevel            @relation(fields: [currentStudyLevelId], references: [id], onDelete: SetDefault)
   desiredStudyCountries DesiredStudyCountry[]
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   academicInterests     AcademicInterests[]
+  savedScholarships     SaveScholarship[]
 }
 
 model Scholarship {
   id                     String                   @id @default(uuid())
-  officialLnk            String?
+  officialLink           String?
   description            String                   @db.Text
   name                   String
   coverPhoto             String?
@@ -54,6 +79,25 @@ model Scholarship {
   fundingType            FundingType
   applicationStartPeriod String
   studyLevels            ScholarshipLevel[]
+  savedBy                SaveScholarship[]
+}
+
+model Connection {
+  userId   String
+  friendId String
+  user     User   @relation("UserConnections", fields: [userId], references: [id])
+  friend   User   @relation("UserSymmetricConnections", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
+}
+
+model SaveScholarship {
+  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId], onDelete: Cascade)
+  scholarshipId String
+  profileId     String
+  profile       Profile     @relation(references: [id], fields: [profileId], onDelete: Cascade)
+
+  @@id([profileId, scholarshipId])
 }
 
 model Country {
@@ -66,7 +110,7 @@ model Country {
 
 model ScholarshipHostCountry {
   countryId     Int
-  country       Country     @relation(references: [id], fields: [countryId])
+  country       Country     @relation(references: [id], fields: [countryId], onDelete: Cascade)
   scholarshipId String
   scholarship   Scholarship @relation(references: [id], fields: [scholarshipId], onDelete: Cascade)
 
@@ -75,18 +119,18 @@ model ScholarshipHostCountry {
 
 model ScholarshipLevel {
   studyLevelId  Int
-  studyLevel    StudyLevel  @relation(references: [id], fields: [studyLevelId])
+  studyLevel    StudyLevel  @relation(references: [id], fields: [studyLevelId], onDelete: Cascade)
   scholarshipId String
-  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId])
+  scholarship   Scholarship @relation(references: [id], fields: [scholarshipId], onDelete: Cascade)
 
-  @@id([studyLevelId])
+  @@id([studyLevelId, scholarshipId])
 }
 
 model AcademicInterests {
   profileId  String
   academicId Int
   profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  academic   Academics @relation(fields: [academicId], references: [id])
+  academic   Academics @relation(fields: [academicId], references: [id], onDelete: Cascade)
 
   @@id([academicId, profileId])
 }
@@ -102,7 +146,7 @@ model DesiredStudyCountry {
   profileId String
   countryId Int
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  country   Country @relation(fields: [countryId], references: [id])
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
 
   @@id([profileId, countryId])
 }

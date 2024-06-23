@@ -60,15 +60,23 @@ export class ScholarshipsService {
       ...(filterOptions.q
         ? {
             OR: [
-              { name: { contains: filterOptions.q, mode: 'insensitive' } },
               {
-                organizationName: {
-                  contains: filterOptions.q,
+                name: {
+                  contains: filterOptions.q.toLowerCase(),
                   mode: 'insensitive',
                 },
               },
               {
-                description: { contains: filterOptions.q, mode: 'insensitive' },
+                organizationName: {
+                  contains: filterOptions.q.toLowerCase(),
+                  mode: 'insensitive',
+                },
+              },
+              {
+                description: {
+                  contains: filterOptions.q.toLowerCase(),
+                  mode: 'insensitive',
+                },
               },
             ],
           }
@@ -110,6 +118,9 @@ export class ScholarshipsService {
         id,
       },
     });
+  }
+  async saveScholarship(scholarshipId: string, userId: string) {
+    return this.scholarshipRepository.saveScholarship(scholarshipId, userId);
   }
 
   update(

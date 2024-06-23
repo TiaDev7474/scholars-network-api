@@ -76,12 +76,26 @@ export class ProfilesService {
     return this.profileRepository.findAll({
       include: {
         country: true,
-        desiredStudyCountries: true,
+        desiredStudyCountries: {
+          select: {
+            country: true,
+          },
+        },
+        currentStudyLevel: {
+          select: {
+            name: true,
+          },
+        },
         user: {
           select: {
             username: true,
             createdAt: true,
             updatedAt: true,
+          },
+        },
+        savedScholarships: {
+          select: {
+            scholarship: true,
           },
         },
       },
@@ -155,6 +169,7 @@ export class ProfilesService {
     return this.profileRepository.remove(id);
   }
   async getAllCountry() {
+    console.log('I am in country service');
     return this.profileRepository.getAllCountry();
   }
   async getAllAcademics() {
