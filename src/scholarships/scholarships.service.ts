@@ -111,6 +111,9 @@ export class ScholarshipsService {
       },
     });
   }
+  async saveScholarship(scholarshipId: string, userId: string) {
+    return this.scholarshipRepository.saveScholarship(scholarshipId, userId);
+  }
 
   update(
     id: string,

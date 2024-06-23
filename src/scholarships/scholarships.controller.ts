@@ -69,7 +69,10 @@ export class ScholarshipsController {
   findOne(@Param('id') id: string) {
     return this.scholarshipsService.findOne(id);
   }
-
+  @Patch('/:id/save')
+  async saveScholarship(@GetUser() user: any, @Param(id) id: string) {
+    return this.scholarshipsService.saveScholarship(id, user.sub);
+  }
   @Patch(':id')
   @UseInterceptors(FileInterceptor('coverPhoto'))
   async update(

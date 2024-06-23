@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/database/prisma.service';
 import { Prisma } from '@prisma/client';
+import { share } from 'rxjs';
 
 @Injectable()
 export class ScholarshipsRepository {
@@ -90,6 +91,52 @@ export class ScholarshipsRepository {
       where: {
         startApplicationDate: {
           gt: new Date(currentTimestamp),
+        },
+      },
+    });
+  }
+  async saveScholarship(scholarshipId: string, userId: string) {
+    const scholarship = await this.prisma.scholarship.findUnique({
+      where: {
+        id: scholarshipId,
+      },
+      include: {
+        savedBy: {
+          select: {
+            profileId: true,
+          },
+        },
+      },
+    });
+    if (!scholarship) {
+      throw new BadRequestException(
+        `Scholarship with id ${scholarshipId} doesn't exist`,
+      );
+    }
+    return this.prisma.scholarship.update({
+      where: {
+        id: scholarshipId,
+      },
+      data: {
+        savedBy: {
+          create: {
+            profile: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        savedBy: {
+          select: {
+            profile: {
+              select: {
+                id: true,
+              },
+            },
+          },
         },
       },
     });
