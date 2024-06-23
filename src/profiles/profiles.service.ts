@@ -88,6 +88,7 @@ export class ProfilesService {
         },
         user: {
           select: {
+            id: true,
             username: true,
             createdAt: true,
             updatedAt: true,
