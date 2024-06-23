@@ -138,6 +138,18 @@ export class ScholarshipsRepository {
         `Scholarship with id ${scholarshipId} doesn't exist`,
       );
     }
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
     return this.prisma.scholarship.update({
       where: {
         id: scholarshipId,
@@ -147,7 +159,7 @@ export class ScholarshipsRepository {
           create: {
             profile: {
               connect: {
-                id: userId,
+                id: user.profile['id'],
               },
             },
           },
