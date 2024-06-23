@@ -13,6 +13,7 @@ import { UseGuards } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create-chat.dto';
 import { ChatService } from './chat.service';
 import { JoinConversationDto } from './dto/join-conversation.dto';
+import { CreateConversationDto } from "./dto/create-conversation.dto";
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -99,6 +100,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     } catch (error) {
       client.emit('chat:conversation:error', {
+        status: 'error',
+        error: error.message,
+      });
+    }
+  }
+  @UseGuards(WsGuard)
+  @SubscribeMessage('chat:conversation:create')
+  async createConversation(
+    @MessageBody() createConversationDto: CreateConversationDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    const { friendId } = createConversationDto;
+    try {
+      const conversation = await this.chatService.createConversation(
+        user.sub,
+        friendId,
+      );
+      client.emit('chat:conversation:created', conversation);
+    } catch (error) {
+      client.emit('chat:conversation:create:error', {
         status: 'error',
         error: error.message,
       });
