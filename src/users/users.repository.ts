@@ -22,6 +22,18 @@ export class UsersRepository {
         where: {
           id,
         },
+        select: {
+          id: true,
+          username: true,
+          profile: {
+            select: {
+              id: true,
+              profilePicture: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
       });
       if (!user) {
         throw new NotFoundException('User not found');

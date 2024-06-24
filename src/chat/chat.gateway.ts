@@ -10,10 +10,12 @@ import {
 import { Socket } from 'socket.io';
 import { WsGuard } from '../auth/guards/ws/ws.guard';
 import { UseGuards } from '@nestjs/common';
-import { CreateMessageDto } from './dto/create-chat.dto';
+import { CreateMessageDto } from './dto/create-message.dto';
 import { ChatService } from './chat.service';
 import { JoinConversationDto } from './dto/join-conversation.dto';
-import { CreateConversationDto } from "./dto/create-conversation.dto";
+import { CreateConversationDto } from './dto/create-conversation.dto';
+
+
 
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -24,26 +26,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(WsGuard)
   async handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
-    const user = client.data.user;
-    const conversations = await this.chatService.getUserConversations(user.sub);
-    conversations.forEach((conversation) => {
-      client.join(conversation.id);
-    });
-  }
 
+  }
   @UseGuards(WsGuard)
   async handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
   }
+
   @UseGuards(WsGuard)
   @SubscribeMessage('chat:conversation:list')
   async getConversationList(@ConnectedSocket() client: Socket) {
+    const { user } = client.data;
     try {
-      const user = client.data.user;
       const conversations = await this.chatService.getUserConversations(
         user.sub,
       );
-      return { conversations };
+      client.emit('chat:conversation:list:loaded', {
+        conversations: conversations,
+      });
     } catch (error) {
       client.emit('chat:conversation:list:error', {
         status: 'error',
@@ -51,6 +51,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
   }
+
   @UseGuards(WsGuard)
   @SubscribeMessage('chat:message:send')
   async handleMessage(
@@ -83,6 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
   }
+
   @UseGuards(WsGuard)
   @SubscribeMessage('chat:conversation:join')
   async joinConversation(
@@ -90,11 +92,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const { conversationId } = joinConversationDto;
+    await client.join(conversationId);
     const user = client.data.user;
     try {
       const messages =
         await this.chatService.getMessagesByConversationId(conversationId);
-      client.emit('chat:conversation:messages', messages);
+      client.emit('chat:conversation:messages', { messages: messages });
       this.server.to(conversationId).emit('chat:conversation:user:joined', {
         username: user.username,
       });
@@ -114,11 +117,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = client.data.user;
     const { friendId } = createConversationDto;
     try {
+      console.log(user.sub, friendId);
       const conversation = await this.chatService.createConversation(
         user.sub,
         friendId,
       );
-      client.emit('chat:conversation:created', conversation);
+      client.emit('chat:conversation:create', { conversation: conversation });
     } catch (error) {
       client.emit('chat:conversation:create:error', {
         status: 'error',

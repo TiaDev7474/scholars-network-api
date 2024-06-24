@@ -1,31 +1,24 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from '../../constant';
+import { CanActivate , ExecutionContext , Injectable } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { jwtConstants } from "../../constant";
+import { WsException } from "@nestjs/websockets";
+
 @Injectable()
 export class WsGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const client: Socket = context.switchToWs().getClient<Socket>();
-    const token = client.handshake.headers.authorization?.split(' ')[1];
+    const client = context.switchToWs().getClient();
+    const token = client.handshake.headers.authorization.split(' ')[1];
     if (!token) {
-      throw new UnauthorizedException();
+      throw new WsException('Unauthorized');
     }
     try {
-      context.switchToWs().getData().user = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: jwtConstants.secret,
-        },
-      );
+      client.data.user = await this.jwtService.verifyAsync(token , {
+        secret: jwtConstants.secret,
+      }); // Attach the user information to the client object
+      return true;
     } catch (e) {
-      throw new UnauthorizedException();
+      throw new WsException('ex.message');
     }
-    return true;
   }
 }
