@@ -22,9 +22,7 @@ export class UsersRepository {
         where: {
           id,
         },
-        select: {
-          id: true,
-          username: true,
+        include: {
           profile: {
             select: {
               id: true,

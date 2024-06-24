@@ -4,7 +4,7 @@ import {
   IsDate ,
   IsEnum ,
   IsNumberString ,
-  IsArray , ArrayNotEmpty
+  IsArray , ArrayNotEmpty , IsDateString
 } from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -35,12 +35,12 @@ export class CreateScholarshipDto {
   fundingType: FundingType;
 
   @ApiProperty()
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   startApplicationDate?: Date;
 
   @ApiProperty()
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   endApplicationDate?: Date;
 

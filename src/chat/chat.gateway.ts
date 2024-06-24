@@ -15,8 +15,6 @@ import { ChatService } from './chat.service';
 import { JoinConversationDto } from './dto/join-conversation.dto';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 
-
-
 @WebSocketGateway({ namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly chatService: ChatService) {}

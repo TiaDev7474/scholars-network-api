@@ -38,7 +38,7 @@ export class UsersService {
     username: string;
   }): Promise<User> {
     try {
-      return this.usersRepository.save(params);
+      return await this.usersRepository.save(params);
     } catch (e) {
       if (e instanceof DatabaseException) {
         throw new InternalServerErrorException('Internal server error');
