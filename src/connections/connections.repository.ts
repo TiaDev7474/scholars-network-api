@@ -22,14 +22,13 @@ export class ConnectionsRepository {
     limit: number;
     where: Prisma.ConnectionWhereInput;
   }) {
-    const { page = 1, limit = 10, where } = params;
+    const { page, limit, where } = params;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
     try {
-      const totalCount = this.prisma.connection.count({
+      const totalCount = await this.prisma.connection.count({
         where,
       });
-
       const userConnections = await this.prisma.connection.findMany({
         where,
         include: {
@@ -45,13 +44,13 @@ export class ConnectionsRepository {
             },
           },
         },
-        take,
-        skip,
+        ...(take ? { take: take } : {}),
+        ...(skip ? { skip: skip } : {}),
       });
       return {
         totalCount,
-        page,
-        limit,
+        page: page ? page : 1,
+        limit: limit ? limit : 10,
         connections: userConnections,
       };
     } catch (error) {
@@ -122,15 +121,14 @@ export class ConnectionsRepository {
     where: Prisma.FriendRequestWhereInput;
     include: Prisma.FriendRequestInclude;
   }) {
-    const { page = 1, limit = 10, where, include } = params;
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const take = Number(limit);
+    const { page, limit, where, include } = params;
+    const take = limit;
+    const skip = (page - 1) * limit;
     return this.prisma.friendRequest.findMany({
       where,
       include,
-      take,
-      skip,
+      ...(take ? { take: take } : {}),
+      ...(skip ? { skip: skip } : {}),
     });
   }
   async acceptOrDeclineFriendRequest(params: {

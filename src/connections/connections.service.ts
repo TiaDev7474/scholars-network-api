@@ -39,10 +39,10 @@ export class ConnectionsService {
     limit: number;
     userId: string;
   }) {
-    const { page = 1, limit, userId } = params;
+    const { page = 1, limit = 10, userId } = params;
     return this.connectionRepository.getRequests({
-      page,
-      limit,
+      page: page,
+      limit: limit,
       where: {
         senderId: userId,
       },
@@ -52,6 +52,7 @@ export class ConnectionsService {
             username: true,
             profile: {
               select: {
+                id: true,
                 profilePicture: true,
               },
             },
@@ -65,7 +66,7 @@ export class ConnectionsService {
     limit: number;
     userId: string;
   }) {
-    const { page = 1, limit = 10, userId } = params;
+    const { page, limit, userId } = params;
     return this.connectionRepository.getRequests({
       page: page,
       limit: limit,
@@ -78,6 +79,7 @@ export class ConnectionsService {
             username: true,
             profile: {
               select: {
+                id: true,
                 profilePicture: true,
               },
             },

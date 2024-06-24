@@ -49,8 +49,8 @@ export class ConnectionsController {
     @Query('limit') limit?: number,
   ) {
     return this.connectionsService.getReceivedRequests({
-      page,
-      limit,
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 10,
       userId: user.sub,
     });
   }
