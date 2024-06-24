@@ -156,6 +156,7 @@ export class ProfilesService {
         country: true,
         user: {
           select: {
+            id: true,
             username: true,
             email: true,
             createdAt: true,
