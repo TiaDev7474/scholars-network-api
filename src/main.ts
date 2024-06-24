@@ -6,12 +6,12 @@ import {
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
-import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api/v1');
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
