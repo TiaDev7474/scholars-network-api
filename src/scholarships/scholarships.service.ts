@@ -10,8 +10,21 @@ export class ScholarshipsService {
 
   create(createScholarshipDto: CreateScholarshipDto, coverPhotoUrl: string) {
     const { hostCountriesIds, studyLevelsIds, ...rest } = createScholarshipDto;
+    let restData;
+    if (rest.startApplicationDate) {
+      restData = {
+        ...rest,
+        startApplicationDate: new Date(rest.startApplicationDate),
+      };
+    }
+    if (rest.endApplicationDate) {
+      restData = {
+        ...rest,
+        endApplicationDate: new Date(rest.endApplicationDate),
+      };
+    }
     const data = {
-      ...rest,
+      ...restData,
       coverPhoto: coverPhotoUrl,
       hostCountries: {
         create: hostCountriesIds.map((hostCountriesId) => ({
@@ -49,11 +62,7 @@ export class ScholarshipsService {
   }
 
   findAll(params: {
-    filterOptions: {
-      q?: string;
-      studyLevelId: string;
-      countryId: string;
-    };
+    filterOptions: { q: string; countryId: string; studyLevelId: string };
   }) {
     const { filterOptions } = params;
     const where: Prisma.ScholarshipWhereInput = {
@@ -94,14 +103,28 @@ export class ScholarshipsService {
         ? {
             hostCountries: {
               some: {
-                countryId: parseInt(filterOptions.countryId),
+                countryId: Number(filterOptions.countryId),
               },
             },
           }
         : {}),
     };
 
-    return this.scholarshipRepository.findAll({ where });
+    return this.scholarshipRepository.findAll({
+      where,
+      include: {
+        hostCountries: {
+          include: {
+            country: true,
+          },
+        },
+        studyLevels: {
+          include: {
+            studyLevel: true,
+          },
+        },
+      },
+    });
   }
   async getScholarshipRecommendation(userId: string, take?: number) {
     return this.scholarshipRepository.getScholarshipRecommendation(
@@ -128,7 +151,7 @@ export class ScholarshipsService {
     updateScholarshipDto: UpdateScholarshipDto,
     coverPhotoUrl?: string,
   ) {
-    const { hostCountriesIds, studyLevelsIds, ...rest } = updateScholarshipDto;
+    const { hostCountriesIds, studyLevelsIds,  endApplicationDate, startApplicationDate, ...rest } = updateScholarshipDto;
     const data = {
       ...rest,
     };
@@ -143,6 +166,12 @@ export class ScholarshipsService {
           },
         })),
       };
+    }
+    if (endApplicationDate) {
+      data['endApplicationDate'] = new Date(endApplicationDate);
+    }
+    if (startApplicationDate) {
+      data['startApplicationDate)'] = new Date(startApplicationDate);
     }
     if (coverPhotoUrl) {
       data['coverPhoto'] = coverPhotoUrl;

@@ -24,7 +24,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(WsGuard)
   async handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
-
   }
   @UseGuards(WsGuard)
   async handleDisconnect(client: Socket) {
@@ -115,7 +114,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = client.data.user;
     const { friendId } = createConversationDto;
     try {
-      console.log(user.sub, friendId);
       const conversation = await this.chatService.createConversation(
         user.sub,
         friendId,

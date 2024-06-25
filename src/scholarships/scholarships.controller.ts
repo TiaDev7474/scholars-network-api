@@ -37,9 +37,9 @@ export class ScholarshipsController {
 
   @Get()
   findAll(
-    @Query('hostCountry') hostCountry: string,
-    @Query('q') q: string,
-    @Query('studyLevel') studyLevel: string,
+    @Query('q') q?: string,
+    @Query('hostCountry') hostCountry?: string,
+    @Query('studyLevel') studyLevel?: string,
   ) {
     const filterOptions = {
       countryId: hostCountry,
@@ -49,6 +49,7 @@ export class ScholarshipsController {
     Object.keys(filterOptions).forEach(
       (key) => filterOptions[key] === undefined && delete filterOptions[key],
     );
+    console.log(filterOptions);
     return this.scholarshipsService.findAll({ filterOptions });
   }
   @Get('/recommendation')
