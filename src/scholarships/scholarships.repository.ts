@@ -40,7 +40,6 @@ export class ScholarshipsRepository {
     include?: Prisma.ScholarshipInclude;
   }) {
     const { where, include } = params;
-
     return this.prisma.scholarship.findMany({
       where,
       include,
