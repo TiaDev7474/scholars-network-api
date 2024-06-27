@@ -47,6 +47,11 @@ export class ConnectionsService {
         senderId: userId,
       },
       include: {
+        sender: {
+          select: {
+            id: true,
+          },
+        },
         receiver: {
           select: {
             username: true,
@@ -74,6 +79,11 @@ export class ConnectionsService {
         receiverId: userId,
       },
       include: {
+        receiver: {
+          select: {
+            id: true,
+          },
+        },
         sender: {
           select: {
             username: true,

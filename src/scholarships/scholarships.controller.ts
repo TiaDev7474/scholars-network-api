@@ -32,6 +32,11 @@ export class ScholarshipsController {
   ) {
     const filename: string = await this.minioService.uploadFile(coverPhoto);
     const coverPhotoUrl = await this.minioService.getFileUrl(filename);
+    console.log(
+      'Controller scholarship create',
+      createScholarshipDto,
+      filename,
+    );
     return this.scholarshipsService.create(createScholarshipDto, coverPhotoUrl);
   }
 

@@ -33,6 +33,7 @@ export class ChatService {
           },
         },
         include: { sender: true, receiver: true },
+        conversationId,
       });
     } catch (error) {
       throw new HttpException(

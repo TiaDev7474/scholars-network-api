@@ -9,10 +9,24 @@ export class MessageRepository {
   async createMessage(params: {
     data: Prisma.MessageCreateInput;
     include: Prisma.MessageInclude;
+    conversationId: string;
   }): Promise<Message> {
     try {
-      const { data, include } = params;
-      return await this.prisma.message.create({ data, include });
+      const { data, include, conversationId } = params;
+      const message = await this.prisma.message.create({ data, include });
+      await this.prisma.conversation.update({
+        where: {
+          id: conversationId,
+        },
+        data: {
+          messages: {
+            connect: {
+              id: message['id'],
+            },
+          },
+        },
+      });
+      return message;
     } catch (error) {
       throw new HttpException(
         `Failed to create message: ${error.message || 'Internal Server Error'}`,

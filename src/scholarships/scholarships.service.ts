@@ -10,18 +10,15 @@ export class ScholarshipsService {
 
   create(createScholarshipDto: CreateScholarshipDto, coverPhotoUrl: string) {
     const { hostCountriesIds, studyLevelsIds, ...rest } = createScholarshipDto;
-    let restData;
-    if (rest.startApplicationDate) {
-      restData = {
-        ...rest,
-        startApplicationDate: new Date(rest.startApplicationDate),
-      };
+    const restData = { ...rest }; // Initialize restData with rest properties
+
+    if (restData.startApplicationDate) {
+      restData['startApplicationDate'] = new Date(
+        restData.startApplicationDate,
+      );
     }
-    if (rest.endApplicationDate) {
-      restData = {
-        ...rest,
-        endApplicationDate: new Date(rest.endApplicationDate),
-      };
+    if (restData.endApplicationDate) {
+      restData.endApplicationDate = new Date(restData.endApplicationDate);
     }
     const data = {
       ...restData,
@@ -57,7 +54,7 @@ export class ScholarshipsService {
         },
       },
     };
-
+    console.log('Service scholarship create', data);
     return this.scholarshipRepository.create({ data, include });
   }
 
@@ -123,6 +120,15 @@ export class ScholarshipsService {
             studyLevel: true,
           },
         },
+        savedBy: {
+          select: {
+            profile: {
+              select: {
+                userId: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -151,7 +157,13 @@ export class ScholarshipsService {
     updateScholarshipDto: UpdateScholarshipDto,
     coverPhotoUrl?: string,
   ) {
-    const { hostCountriesIds, studyLevelsIds,  endApplicationDate, startApplicationDate, ...rest } = updateScholarshipDto;
+    const {
+      hostCountriesIds,
+      studyLevelsIds,
+      endApplicationDate,
+      startApplicationDate,
+      ...rest
+    } = updateScholarshipDto;
     const data = {
       ...rest,
     };

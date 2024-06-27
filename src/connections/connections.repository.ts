@@ -178,6 +178,25 @@ export class ConnectionsRepository {
             receiverId,
           },
         },
+        include: {
+          receiver: {
+            select: {
+              id: true,
+            },
+          },
+          sender: {
+            select: {
+              username: true,
+              email: true,
+              profile: {
+                select: {
+                  id: true,
+                  profilePicture: true,
+                },
+              },
+            },
+          },
+        },
       });
     } catch (error) {
       if (error instanceof HttpException) {

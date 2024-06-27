@@ -37,12 +37,12 @@ export class CreateScholarshipDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  startApplicationDate?: string;
+  startApplicationDate?: Date;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  endApplicationDate?: string;
+  endApplicationDate?: Date;
 
   @ApiProperty()
   @IsString()
