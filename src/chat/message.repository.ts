@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/database/prisma.service';
 import { Conversation, Message, Prisma } from '@prisma/client';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class MessageRepository {
@@ -9,10 +10,24 @@ export class MessageRepository {
   async createMessage(params: {
     data: Prisma.MessageCreateInput;
     include: Prisma.MessageInclude;
+    conversationId: string;
   }): Promise<Message> {
     try {
-      const { data, include } = params;
-      return await this.prisma.message.create({ data, include });
+      const { data, include, conversationId } = params;
+      const message = await this.prisma.message.create({ data, include });
+      await this.prisma.conversation.update({
+        where: {
+          id: conversationId,
+        },
+        data: {
+          messages: {
+            connect: {
+              id: message['id'],
+            },
+          },
+        },
+      });
+      return message;
     } catch (error) {
       throw new HttpException(
         `Failed to create message: ${error.message || 'Internal Server Error'}`,
@@ -23,11 +38,61 @@ export class MessageRepository {
 
   async getMessagesByConversationId(
     conversationId: string,
-  ): Promise<Message[]> {
+  ): Promise<Conversation> {
     try {
-      return await this.prisma.message.findMany({
-        where: { conversationId },
-        include: { sender: true, receiver: true },
+      return await this.prisma.conversation.findUnique({
+        where: {
+          id: conversationId,
+        },
+        include: {
+          participants: {
+            select: {
+              participantA: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      id: true,
+                      profilePicture: true,
+                    },
+                  },
+                },
+              },
+              participantB: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      id: true,
+                      profilePicture: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          messages: {
+            orderBy: {
+              sentAt: 'desc',
+            },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      id: true,
+                      profilePicture: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     } catch (error) {
       throw new HttpException(
@@ -88,6 +153,20 @@ export class MessageRepository {
             orderBy: {
               sentAt: 'desc',
             },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  username: true,
+                  profile: {
+                    select: {
+                      id: true,
+                      profilePicture: true,
+                    },
+                  },
+                },
+              },
+            },
           },
           participants: {
             select: {
@@ -120,9 +199,8 @@ export class MessageRepository {
         },
       });
     } catch (error) {
-      throw new HttpException(
+      throw new WsException(
         `Failed to fetch user conversations: ${error.message || 'Internal Server Error'}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

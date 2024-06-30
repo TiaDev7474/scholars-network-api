@@ -35,12 +35,12 @@ export class CreateScholarshipDto {
   fundingType: FundingType;
 
   @ApiProperty()
-  @IsDate()
+  @IsString()
   @IsOptional()
   startApplicationDate?: Date;
 
   @ApiProperty()
-  @IsDate()
+  @IsString()
   @IsOptional()
   endApplicationDate?: Date;
 

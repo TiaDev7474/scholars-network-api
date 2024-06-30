@@ -12,10 +12,16 @@ import {
 } from '@prisma/client/runtime/library';
 import { DatabaseException } from '../common/exceptions/exception';
 import { FriendRequestStatus, Prisma } from '@prisma/client';
+import { MessageRepository } from '../chat/message.repository';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ConnectionsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messageRepository: MessageRepository,
+    private readonly notificationService: NotificationsService,
+  ) {}
 
   async getUsersConnections(params: {
     page: number;
@@ -79,7 +85,7 @@ export class ConnectionsRepository {
           HttpStatus.CONFLICT,
         );
       }
-      return await this.prisma.friendRequest.create({
+      const request = await this.prisma.friendRequest.create({
         data: {
           sender: {
             connect: {
@@ -104,6 +110,23 @@ export class ConnectionsRepository {
           },
         },
       });
+      const { id } = request;
+      console.log('request-notification', {
+        from: senderId,
+        to: receiverId,
+        type: 'FRIEND_REQUEST',
+        content: 'sent you connection request',
+        source: id,
+      });
+      const job = await this.notificationService.createNotification({
+        from: senderId,
+        to: receiverId,
+        type: 'FRIEND_REQUEST',
+        content: 'sent you connection request',
+        source: id,
+      });
+      console.log(job);
+      return request;
     } catch (e) {
       if (e instanceof PrismaClientValidationError) {
         throw new BadRequestException(
@@ -178,6 +201,25 @@ export class ConnectionsRepository {
             receiverId,
           },
         },
+        include: {
+          receiver: {
+            select: {
+              id: true,
+            },
+          },
+          sender: {
+            select: {
+              username: true,
+              email: true,
+              profile: {
+                select: {
+                  id: true,
+                  profilePicture: true,
+                },
+              },
+            },
+          },
+        },
       });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -191,7 +233,7 @@ export class ConnectionsRepository {
   }
   async initializeConnection(params: { userId: string; friendId: string }) {
     const { userId, friendId } = params;
-
+    await this.messageRepository.createConversation({ userId, friendId });
     await this.prisma.user.update({
       where: {
         id: userId,

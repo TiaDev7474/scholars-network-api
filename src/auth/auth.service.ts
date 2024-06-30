@@ -156,6 +156,7 @@ export class AuthService {
       sub: user.id,
     };
     return {
+      userId: user.id,
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: await this.jwtService.signAsync(payload),
     };

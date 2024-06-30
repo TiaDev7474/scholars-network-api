@@ -7,6 +7,7 @@ export class MailProcessor {
   @Process('welcome')
   async sendWelcomeEmail(job: Job<Mail>) {
     const { data } = job;
+    
   }
 
   @Process('reset-password')

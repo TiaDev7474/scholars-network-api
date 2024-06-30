@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageRepository } from './message.repository'; // Adjust the import path as per your project structure
 import { Conversation, Message } from '@prisma/client';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class ChatService {
@@ -13,7 +14,7 @@ export class ChatService {
     conversationId: string,
   ): Promise<Message> {
     try {
-      return await this.messageRepository.createMessage({
+      const message = await this.messageRepository.createMessage({
         data: {
           sender: {
             connect: {
@@ -32,8 +33,23 @@ export class ChatService {
             },
           },
         },
-        include: { sender: true, receiver: true },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+              profile: {
+                select: {
+                  id: true,
+                  profilePicture: true,
+                },
+              },
+            },
+          },
+        },
+        conversationId,
       });
+      return message;
     } catch (error) {
       throw new HttpException(
         `Failed to send message: ${error.message || 'Internal Server Error'}`,
@@ -44,7 +60,7 @@ export class ChatService {
 
   async getMessagesByConversationId(
     conversationId: string,
-  ): Promise<Message[]> {
+  ): Promise<Conversation> {
     try {
       return await this.messageRepository.getMessagesByConversationId(
         conversationId,
@@ -59,11 +75,11 @@ export class ChatService {
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
     try {
+      console.log(userId);
       return await this.messageRepository.getUserConversation({ userId });
     } catch (error) {
-      throw new HttpException(
+      throw new WsException(
         `Failed to fetch user conversations: ${error.message || 'Internal Server Error'}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -93,7 +109,10 @@ export class ChatService {
         friendId,
       });
     } catch (error) {
-      throw new HttpException(`Failed to check conversation: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        `Failed to check conversation: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
