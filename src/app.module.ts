@@ -6,11 +6,12 @@ import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ProfilesModule } from './profiles/profiles.module';
 import * as process from 'process';
-import { MinioModule } from "./common/lib/minio/minio.module";
+import { MinioModule } from './common/lib/minio/minio.module';
 import { ScholarshipsModule } from './scholarships/scholarships.module';
 import { ConnectionsModule } from './connections/connections.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationsModule } from './notifications/notifications.module';
+
 
 @Module({
   imports: [

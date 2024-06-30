@@ -1,17 +1,18 @@
 import {
-  Controller,
-  Get,
-  InternalServerErrorException,
-  Param,
-  Patch,
-  Query,
-  Sse,
-} from '@nestjs/common';
+  Controller ,
+  Get , HttpException , HttpStatus ,
+  InternalServerErrorException ,
+  Param ,
+  Patch ,
+  Query ,
+  Res ,
+  Sse
+} from "@nestjs/common";
 import { GetUser } from '../common/decorators/user.decorator';
-import { NotificationsService } from './notifications.service';
-import { Observable } from 'rxjs';
+import { EventObject, NotificationsService } from './notifications.service';
+import { interval, map, Observable } from 'rxjs';
 import { CategoryEnum, NotificationRepository } from './notifcation.repository';
-import { Notification } from '@prisma/client';
+import { Response } from 'express';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -32,8 +33,8 @@ export class NotificationsController {
         0,
         category,
       );
-    } catch (e) {
-      throw new InternalServerErrorException(e);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
   @Patch(':id')
@@ -43,17 +44,38 @@ export class NotificationsController {
   ) {
     try {
       return this.notificationRepository.updateNotification(id, markAs);
-    } catch (e) {
-      throw new InternalServerErrorException(e);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  @Get('subscribe')
-  @Sse()
+  @Patch()
+  markAllNotificationAsRead(@Query('ids') notificationIds: string[]) {
+    try {
+      return this.notificationRepository.updateAllNotification(
+        true,
+        notificationIds,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Sse('subscribe')
   subscribeToNotification(
     @GetUser() user: any,
-  ): Observable<{ data: Notification }> {
-    const { sub } = user;
-    console.log('sse subscribe', sub);
-    return this.notificationService.subscribeToNotifications(sub);
+    @Res() response: Response,
+  ): Observable<MessageEvent> {
+    this.notificationService.addUser(user.sub);
+    response.on('close', () => {
+      this.notificationService.removeUser(user.sub);
+    });
+    return this.notificationService.subscribeToNotification(user.sub);
+  }
+
+  @Get('test')
+  @Sse('sse')
+  sse(): Observable<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return interval(1000).pipe(map((_) => ({ data: { hello: 'world' } })));
   }
 }

@@ -16,11 +16,15 @@ export class NotificationsProcessor {
   async createNotification(job: Job<CreateNotificationDto>) {
     const { data } = job;
     console.log('Processing', job.id, job.data);
-    return this.notificationRepository.createNotification(data);
+    return await this.notificationRepository.createNotification(data);
   }
   @OnQueueCompleted()
   async handler(job: Job, result: Notification) {
-    return this.notificationService.sendNotification(result.toId, result);
+    console.log(
+      `Job ${job.id} of type ${job.name} with data ${job.data} completed...`,
+    );
+    console.log('result', result);
+    return await this.notificationService.sendNotification(result.toId, result);
   }
   @OnQueueActive()
   onActive(job: Job) {

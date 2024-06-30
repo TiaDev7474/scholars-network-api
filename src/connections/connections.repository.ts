@@ -118,13 +118,14 @@ export class ConnectionsRepository {
         content: 'sent you connection request',
         source: id,
       });
-      await this.notificationService.createNotification({
+      const job = await this.notificationService.createNotification({
         from: senderId,
         to: receiverId,
         type: 'FRIEND_REQUEST',
         content: 'sent you connection request',
         source: id,
       });
+      console.log(job);
       return request;
     } catch (e) {
       if (e instanceof PrismaClientValidationError) {
