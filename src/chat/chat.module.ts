@@ -6,5 +6,6 @@ import { MessageRepository } from './message.repository';
 @Module({
   controllers: [],
   providers: [ChatService, MessageRepository, ChatGateway],
+  exports: [MessageRepository],
 })
 export class ChatModule {}

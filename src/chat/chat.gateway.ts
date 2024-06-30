@@ -14,8 +14,9 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { ChatService } from './chat.service';
 import { JoinConversationDto } from './dto/join-conversation.dto';
 import { CreateConversationDto } from './dto/create-conversation.dto';
+import { Conversation } from '@prisma/client';
 
-@WebSocketGateway({ namespace: 'chat' })
+@WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly chatService: ChatService) {}
   @WebSocketServer()
@@ -48,7 +49,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
   }
-
+  @UseGuards(WsGuard)
+  @SubscribeMessage('chat:conversation:subscribe')
+  async subscribeToAllConversation(@ConnectedSocket() client: Socket) {
+    const { user } = client.data;
+    await client.join(user.sub);
+    try {
+      const conversations: Conversation[] =
+        await this.chatService.getUserConversations(user.sub);
+      await Promise.all(
+        conversations?.map(async (conversation) => {
+          await client.join(conversation.id);
+        }),
+      );
+      client.emit('chat:conversation:subscribe:success');
+    } catch (error) {
+      client.emit('chat:conversation:subscribe:error', {
+        status: 'error',
+        error: error.message,
+      });
+    }
+  }
   @UseGuards(WsGuard)
   @SubscribeMessage('chat:message:send')
   async handleMessage(
@@ -65,14 +86,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         content,
         conversationId,
       );
-
+      console.log(message);
       client.emit('chat:message:sent', { status: 'success', message });
 
       // Broadcast to the conversation room
       this.server.to(conversationId).emit('chat:message:new', {
-        from: user.sub,
-        content: message.content,
-        sentAt: message.sentAt,
+        message: message,
       });
     } catch (error) {
       client.emit('chat:message:error', {
@@ -81,7 +100,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
   }
-
   @UseGuards(WsGuard)
   @SubscribeMessage('chat:conversation:join')
   async joinConversation(
@@ -89,17 +107,43 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const { conversationId } = joinConversationDto;
+
     await client.join(conversationId);
     const user = client.data.user;
+    await client.join(user.sub);
     try {
-      const messages =
+      const conversationWithMessages =
         await this.chatService.getMessagesByConversationId(conversationId);
-      client.emit('chat:conversation:messages', { messages: messages });
+      client.emit('chat:conversation:messages', {
+        conversation: conversationWithMessages,
+      });
       this.server.to(conversationId).emit('chat:conversation:user:joined', {
         username: user.username,
       });
     } catch (error) {
       client.emit('chat:conversation:error', {
+        status: 'error',
+        error: error.message,
+      });
+    }
+  }
+  @UseGuards(WsGuard)
+  @SubscribeMessage('chat:conversation:typing')
+  async indicateUserTypingMessage(
+    @MessageBody() sendingMessageDto: JoinConversationDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    const { conversationId } = sendingMessageDto;
+    try {
+      this.server
+        .to(conversationId)
+        .except(user.sub)
+        .emit('chat:conversation:typing', {
+          message: `${user.username} is typing... `,
+        });
+    } catch (error) {
+      client.emit('chat:conversation:typing:error', {
         status: 'error',
         error: error.message,
       });
@@ -118,7 +162,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         user.sub,
         friendId,
       );
-      client.emit('chat:conversation:create', { conversation: conversation });
+      client.emit('chat:conversation:created', { conversation: conversation });
     } catch (error) {
       client.emit('chat:conversation:create:error', {
         status: 'error',

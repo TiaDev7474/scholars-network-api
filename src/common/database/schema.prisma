@@ -31,6 +31,8 @@ model User {
   sentMessages                      Message[]                 @relation("SenderMessages")
   conversationParticipants          ConversationParticipant[] @relation("ParticipantsA")
   conversationParticipantSymmetrics ConversationParticipant[] @relation("ParticipantsB")
+  notificationForYou                Notification[]            @relation("NotificationForYou")
+  notificationFromYou               Notification[]            @relation("NotificationFromYou")
 }
 
 model Message {
@@ -67,6 +69,7 @@ model ConversationParticipant {
 }
 
 model FriendRequest {
+  id         String              @id @default(uuid())
   senderId   String
   receiverId String
   status     FriendRequestStatus @default(PENDING)
@@ -126,6 +129,24 @@ model Connection {
   friend   User   @relation("UserSymmetricConnections", fields: [friendId], references: [id])
 
   @@unique([userId, friendId])
+}
+
+model Notification {
+  id        String               @id @default(uuid())
+  type      NotificationTypeEnum
+  content   String
+  sourceId  String // friend request id or post id , or scholarship id
+  isRead    Boolean              @default(false)
+  fromId    String // user that trigger the notification
+  from      User                 @relation("NotificationFromYou", references: [id], fields: [fromId])
+  toId      String // user that will receive notification
+  to        User                 @relation("NotificationForYou", references: [id], fields: [toId])
+  createdAt DateTime             @default(now())
+}
+
+enum NotificationTypeEnum {
+  FRIEND_REQUEST
+  NEW_SCHOLARSHIP
 }
 
 model SaveScholarship {

@@ -10,6 +10,7 @@ import { MinioModule } from "./common/lib/minio/minio.module";
 import { ScholarshipsModule } from './scholarships/scholarships.module';
 import { ConnectionsModule } from './connections/connections.module';
 import { ChatModule } from './chat/chat.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ChatModule } from './chat/chat.module';
     ScholarshipsModule,
     ConnectionsModule,
     ChatModule,
+    NotificationsModule,
   ],
   providers: [],
 })
