@@ -1,12 +1,11 @@
 import {
-  ArrayNotEmpty ,
-  IsArray ,
-  IsDate ,
-  IsInt , IsNumberString ,
-  IsOptional ,
-  IsString ,
-  IsUrl
-} from "class-validator";
+  ArrayNotEmpty,
+  IsArray,
+  IsDate,
+  IsNumberString,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProfileDto {
@@ -32,7 +31,6 @@ export class CreateProfileDto {
   @IsArray()
   @ArrayNotEmpty()
   desiredStudyCountryIds: number[];
-
   @ApiProperty()
   @IsArray()
   @ArrayNotEmpty()

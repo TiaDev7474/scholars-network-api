@@ -33,6 +33,73 @@ model User {
   conversationParticipantSymmetrics ConversationParticipant[] @relation("ParticipantsB")
   notificationForYou                Notification[]            @relation("NotificationForYou")
   notificationFromYou               Notification[]            @relation("NotificationFromYou")
+  likes                             Like[]
+  comments                          Comment[]
+}
+
+model Thread {
+  id       String       @id @default(uuid())
+  content  String?      @db.Text
+  likes    Like[]
+  comments Comment[]
+  media    Media?
+  tags     TagsOnPost[]
+}
+
+model Like {
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+}
+
+model Tag {
+  id    String       @id @default(uuid())
+  name  String
+  posts TagsOnPost[]
+}
+
+model TagsOnPost {
+  tagId    String
+  tag      Tag    @relation(references: [id], fields: [tagId])
+  threadId String
+  thread   Thread @relation(references: [id], fields: [threadId])
+
+  @@id([threadId, tagId])
+}
+
+model Media {
+  id        String    @id @default(uuid())
+  url       String
+  type      MediaType
+  thread    Thread    @relation(fields: [threadId], references: [id])
+  threadId  String    @unique
+  commentId String?   @unique
+  comment   Comment?  @relation(fields: [commentId], references: [id])
+}
+
+enum MediaType {
+  LINK
+  IMAGE
+  VIDEO
+  FILE
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String?  @db.Text
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  thread    Thread   @relation(fields: [threadId], references: [id])
+  threadId  String
+  createdAt DateTime @default(now())
+  Media     Media?
+}
+
+enum PostTypeEnum {
+  news
+  tips
 }
 
 model Message {
@@ -135,7 +202,7 @@ model Notification {
   id        String               @id @default(uuid())
   type      NotificationTypeEnum
   content   String
-  sourceId  String // friend request id or post id , or scholarship id
+  sourceId  String // friend request id or thread id , or scholarship id
   isRead    Boolean              @default(false)
   fromId    String // user that trigger the notification
   from      User                 @relation("NotificationFromYou", references: [id], fields: [fromId])
